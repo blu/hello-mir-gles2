@@ -1,3 +1,8 @@
+// Baased on code from Joe Groff's tutorial posted at Durian Software
+// see http://duriansoftware.com/joe/An-intro-to-modern-OpenGL.-Chapter-2:-Hello-World:-The-Slideshow.html
+
+// Also based on:
+
 /*
  * Trivial GL demo; flashes the screen. Showing how simple life is with eglapp.
  *
@@ -17,9 +22,6 @@
  *
  * Author: Daniel van Vugt <daniel.van.vugt@canonical.com>
  */
-
-// Also based on code from Joe Groff's tutorial posted at Durian Software
-// see http://duriansoftware.com/joe/An-intro-to-modern-OpenGL.-Chapter-2:-Hello-World:-The-Slideshow.html
 
 // Modified by don bright <http://github.com/donbright> 2014
 
