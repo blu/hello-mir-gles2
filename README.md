@@ -95,6 +95,10 @@ Joe's Masterful Tutorial:
 
 *http://duriansoftware.com/joe/An-intro-to-modern-OpenGL.-Chapter-2:-Hello-World:-The-Slideshow.html
 
+@Robn's port of Joe's code to Sam Lantinga's SDL library:
+
+*https://github.com/robn/hello-gl
+
 GLES and the #version and precision thing:
 
 *http://stackoverflow.com/questions/10383113/differences-between-glsl-and-glsl-es-2
