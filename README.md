@@ -50,10 +50,10 @@ For a non-X11 do this:
 * Log in to X11. Don't log out.
 * Switch to VT1 (Ctrl+Alt+F1)
 * $ sudo mir_demo_server_basic
-* Switch to VT2 <Ctrl+Alt+F2>
+* Switch to VT2 (Ctrl+Alt+F2)
 * $ sudo chmod 777 /tmp/mir_socket
 * $ sudo ./hello_mir_gles2
-* Switch back to VT1 to watch program output <Ctrl+Alt+F1>
+* Switch back to VT1 to watch program output (Ctrl+Alt+F1)
 * Switch back to VT2, its probably corrupted now
 * Switch back to X11 to clear screen (alt-right, alt-right, repeatedly)
 
