@@ -105,11 +105,12 @@ GLES and the #version and precision thing:
 *http://stackoverflow.com/questions/10383113/differences-between-glsl-and-glsl-es-2
 *http://stackoverflow.com/questions/23853345/qt-desktop-shader-compilation-issue
 
-Mir and Wayland vs X11:
+Lots and Lots of details about capability of GLESv2 on EGL, OpenGL 3 on EGL,
+Mir and Wayland with EGL, X11, 2d accelleration, etc etc etc.
 
 *http://shnatsel.blogspot.com/2013/03/why-your-desktop-wont-be-running.html
 
-GLES vs plain old GL:
+On GLES vs plain old-school OpenGL(TM):
 
 *http://pandorawiki.org/Porting_to_GLES_from_GL
 
