@@ -18,6 +18,10 @@
  * Author: Daniel van Vugt <daniel.van.vugt@canonical.com>
  */
 
+// Modified by don bright <http://github.com/donbright> 2014
+// to add code from Joe Groff's tutorial posted at Durian Software
+// see http://duriansoftware.com/joe/An-intro-to-modern-OpenGL.-Chapter-2:-Hello-World:-The-Slideshow.html
+
 #include <math.h>
 #include <stdio.h>
 #include <unistd.h>
