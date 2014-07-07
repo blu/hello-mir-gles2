@@ -43,8 +43,8 @@ See http://unity.ubuntu.com/mir/using_mir_on_pc.html
 
 For a non-X11 do this:
 
-*Log in to X11. Don't log out.
-*Switch to VT1 (Ctrl+Alt+F1)
+ *Log in to X11. Don't log out.
+ *Switch to VT1 (Ctrl+Alt+F1)
 *$ sudo mir_demo_server_basic
 *Switch to VT2 <Ctrl+Alt+F2>
 *$ sudo chmod 777 /tmp/mir_socket
