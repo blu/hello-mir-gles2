@@ -1,12 +1,33 @@
-#include <stdlib.h>
-#include <GL/glew.h>
-#ifdef __APPLE__
-#  include <GLUT/glut.h>
-#else
-#  include <GL/glut.h>
-#endif
+/*
+ * Trivial GL demo; flashes the screen. Showing how simple life is with eglapp.
+ *
+ * Copyright © 2013 Canonical Ltd.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 3 as
+ * published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * Author: Daniel van Vugt <daniel.van.vugt@canonical.com>
+ */
+
 #include <math.h>
 #include <stdio.h>
+#include <unistd.h>
+#include <stdlib.h>
+//#include <GL/glew.h>
+#include "eglapp.h"
+#include <GLES2/gl2.h>
+#include <GLES2/gl2ext.h>
+#define GL_RGB8 GL_RGB8_OES
+#define GL_BGR 0x80e0
 #include "util.h"
 
 /*
@@ -71,6 +92,7 @@ static GLuint make_texture(const char *filename)
     return texture;
 }
 
+/*
 static void show_info_log(
     GLuint object,
     PFNGLGETSHADERIVPROC glGet__iv,
@@ -86,6 +108,7 @@ static void show_info_log(
     fprintf(stderr, "%s", log);
     free(log);
 }
+*/
 
 static GLuint make_shader(GLenum type, const char *filename)
 {
@@ -105,8 +128,14 @@ static GLuint make_shader(GLenum type, const char *filename)
     glGetShaderiv(shader, GL_COMPILE_STATUS, &shader_ok);
     if (!shader_ok) {
         fprintf(stderr, "Failed to compile %s:\n", filename);
-        show_info_log(shader, glGetShaderiv, glGetShaderInfoLog);
-        glDeleteShader(shader);
+            GLchar log[1024];
+            glGetShaderInfoLog(shader, sizeof log - 1, NULL, log);
+            log[sizeof log - 1] = '\0';
+            printf("load_shader compile failed: %s\n", log);
+            glDeleteShader(shader);
+            shader = 0;
+        //show_info_log(shader, glGetShaderiv, glGetShaderInfoLog);
+//        glDeleteShader(shader);
         return 0;
     }
     return shader;
@@ -125,7 +154,7 @@ static GLuint make_program(GLuint vertex_shader, GLuint fragment_shader)
     glGetProgramiv(program, GL_LINK_STATUS, &program_ok);
     if (!program_ok) {
         fprintf(stderr, "Failed to link shader program:\n");
-        show_info_log(program, glGetProgramiv, glGetProgramInfoLog);
+        //show_info_log(program, glGetProgramiv, glGetProgramInfoLog);
         glDeleteProgram(program);
         return 0;
     }
@@ -148,6 +177,8 @@ static const GLushort g_element_buffer_data[] = { 0, 1, 2, 3 };
  */
 static int make_resources(void)
 {
+    fprintf(stderr,"make res stage 1\n");
+    fflush(stderr);
     g_resources.vertex_buffer = make_buffer(
         GL_ARRAY_BUFFER,
         g_vertex_buffer_data,
@@ -162,9 +193,13 @@ static int make_resources(void)
     g_resources.textures[0] = make_texture("hello1.tga");
     g_resources.textures[1] = make_texture("hello2.tga");
 
+    fprintf(stderr,"make res stage 2\n");
+    fflush(stderr);
     if (g_resources.textures[0] == 0 || g_resources.textures[1] == 0)
         return 0;
 
+    fprintf(stderr,"make res stage 3\n");
+    fflush(stderr);
     g_resources.vertex_shader = make_shader(
         GL_VERTEX_SHADER,
         "hello-gl.v.glsl"
@@ -172,6 +207,8 @@ static int make_resources(void)
     if (g_resources.vertex_shader == 0)
         return 0;
 
+    fprintf(stderr,"make res stage 4\n");
+    fflush(stderr);
     g_resources.fragment_shader = make_shader(
         GL_FRAGMENT_SHADER,
         "hello-gl.f.glsl"
@@ -179,10 +216,14 @@ static int make_resources(void)
     if (g_resources.fragment_shader == 0)
         return 0;
 
+    fprintf(stderr,"make res stage 5\n");
+    fflush(stderr);
     g_resources.program = make_program(g_resources.vertex_shader, g_resources.fragment_shader);
     if (g_resources.program == 0)
         return 0;
 
+    fprintf(stderr,"make res stage 6\n");
+    fflush(stderr);
     g_resources.uniforms.fade_factor
         = glGetUniformLocation(g_resources.program, "fade_factor");
     g_resources.uniforms.textures[0]
@@ -190,20 +231,21 @@ static int make_resources(void)
     g_resources.uniforms.textures[1]
         = glGetUniformLocation(g_resources.program, "textures[1]");
 
+    fprintf(stderr,"make res stage 7\n");
+    fflush(stderr);
     g_resources.attributes.position
         = glGetAttribLocation(g_resources.program, "position");
 
     return 1;
 }
 
-/*
- * GLUT callbacks:
- */
+/////// 2 main loop functions
+
 static void update_fade_factor(void)
 {
-    int milliseconds = glutGet(GLUT_ELAPSED_TIME);
+    int milliseconds = 1;//glutGet(GLUT_ELAPSED_TIME);
     g_resources.fade_factor = sinf((float)milliseconds * 0.001f) * 0.5f + 0.5f;
-    glutPostRedisplay();
+    //glutPostRedisplay();
 }
 
 static void render(void)
@@ -240,33 +282,58 @@ static void render(void)
     );
 
     glDisableVertexAttribArray(g_resources.attributes.position);
-    glutSwapBuffers();
+//    glutSwapBuffers();
 }
 
-/*
- * Entry point
- */
-int main(int argc, char** argv)
+int main(int argc, char *argv[])
 {
-    glutInit(&argc, argv);
-    glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE);
-    glutInitWindowSize(400, 300);
-    glutCreateWindow("Hello World");
-    glutIdleFunc(&update_fade_factor);
-    glutDisplayFunc(&render);
+    fprintf(stderr, "begin..\n");
+    fflush(stderr);
+    unsigned int width = 400, height = 300; // match .tga files
 
-    glewInit();
+//    glewInit();
+/*
     if (!GLEW_VERSION_2_0) {
         fprintf(stderr, "OpenGL 2.0 not available\n");
         return 1;
     }
+*/
 
+    fprintf(stderr, "init..\n");
+    if (!mir_eglapp_init(argc, argv, &width, &height))
+        return 1;
+
+    fprintf(stderr, "make resources..\n");
     if (!make_resources()) {
         fprintf(stderr, "Failed to load resources\n");
         return 1;
     }
 
-    glutMainLoop();
+    fprintf(stderr, "loop..\n");
+    while (mir_eglapp_running())
+    {
+	fprintf(stderr,"loop\n");
+	update_fade_factor();
+	render();
+
+//        glClearColor(1.0f, 0.0f, 0.0f, mir_eglapp_background_opacity);
+//        glClear(GL_COLOR_BUFFER_BIT);
+        mir_eglapp_swap_buffers();
+        //sleep(1);
+/*
+        glClearColor(0.0f, 1.0f, 0.0f, mir_eglapp_background_opacity);
+        glClear(GL_COLOR_BUFFER_BIT);
+        mir_eglapp_swap_buffers();
+        sleep(1);
+
+        glClearColor(0.0f, 0.0f, 1.0f, mir_eglapp_background_opacity);
+        glClear(GL_COLOR_BUFFER_BIT);
+        mir_eglapp_swap_buffers();
+        sleep(1);
+*/
+    }
+
+    mir_eglapp_shutdown();
+
     return 0;
 }
-
