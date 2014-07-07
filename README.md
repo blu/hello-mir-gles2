@@ -3,9 +3,13 @@
 This is a very basic example showing some GLSL GLESv2 example code
 running on Ubuntu MIR using EGL. 
 
-This combines the source code from Joe Groff's OpenGL tutorial with 
-Ubuntu MIR's GLESv2 example code (with EGL handling GL context). This 
-allows us to explore the following:
+It combines code from Joe Groff's OpenGL tutorial with code from Daniel 
+van Vugt, of Canonical Inc, from Ubuntu MIR's demos.
+
+*http://duriansoftware.com/joe/An-intro-to-modern-OpenGL.-Chapter-2:-Hello-World:-The-Slideshow.html
+*http://bazaar.launchpad.net/~mir-team/mir/utopic/view/head:/examples/eglflash.c
+
+This allows us to explore the following:
 
 0. Handle GL context with EGL and Ubuntu's MIR, instead of X11's GLX.
 
