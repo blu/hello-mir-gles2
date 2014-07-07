@@ -18,10 +18,12 @@
  * Author: Daniel van Vugt <daniel.van.vugt@canonical.com>
  */
 
-// Modified by don bright <http://github.com/donbright> 2014
-// to add code from Joe Groff's tutorial posted at Durian Software
+// Also based on code from Joe Groff's tutorial posted at Durian Software
 // see http://duriansoftware.com/joe/An-intro-to-modern-OpenGL.-Chapter-2:-Hello-World:-The-Slideshow.html
 
+// Modified by don bright <http://github.com/donbright> 2014
+
+#include <time.h>
 #include <math.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -247,7 +249,10 @@ static int make_resources(void)
 
 static void update_fade_factor(void)
 {
-    int milliseconds = 1;//glutGet(GLUT_ELAPSED_TIME);
+    struct timespec t;
+    clock_gettime(CLOCK_MONOTONIC, &t);
+    long int milliseconds = t.tv_nsec / 1.0e6;
+    //int milliseconds = 1;//glutGet(GLUT_ELAPSED_TIME);
     g_resources.fade_factor = sinf((float)milliseconds * 0.001f) * 0.5f + 0.5f;
     //glutPostRedisplay();
 }

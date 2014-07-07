@@ -308,7 +308,8 @@ mir_eglapp_bool mir_eglapp_init(int argc, char *argv[],
         format, max_formats, &nformats);
 
     surfaceparm.pixel_format = format[0];
-    for (unsigned int f = 0; f < nformats; f++)
+    unsigned int f;
+    for (f = 0; f < nformats; f++)
     {
         const int opaque = (format[f] == mir_pixel_format_xbgr_8888 ||
                             format[f] == mir_pixel_format_xrgb_8888 ||
