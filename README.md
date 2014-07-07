@@ -80,19 +80,14 @@ run this:
 
 ##what about Wayland and Weston, they can be used to draw EGL without X11 too?
 
-Unfortunately simple Wayland / Weston demo programs are unbuildable on 
-standard Ubuntu 14.04 as of writing (mid 2014) due to a breakage in 
-backwards compatability requiring libwayland to be rebuilt from source 
-from the github 'master' version. 
+This is possible, but I gave up trying after having some problems trying
+to build the Weston examples without building all of Weston.. and then
+failing to build all of Weston due to the following breakage of backwards
+compatability:
 
 https://www.mail-archive.com/wayland-devel@lists.freedesktop.org/msg14995.html
 
-This is a bit of a challenge on Ubuntu because removing the wayland 
-package will remove a whole lot of other stuff too.
-
-It is entirely possible to do it, if you mess around with git and keep 
-the wayland you build separate from the wayland that comes standard with 
-ubuntu, but.. i will leave that for someone else to do.
+It can be done, i will leave it for another time, or for another person to do.
 
 ##see also
 
