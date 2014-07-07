@@ -19,8 +19,9 @@ This allows us to explore the following:
 2. Since GLESv2 deprecates alot of the same stuff as OpenGL3, this allows
    to test a kind of 'updated' non-deprecated GL system
 
-3. A system without GLEW, since GLEW support for GLES and EGL is experimental
-   and not 'standard' on most systems as of writing (mid 2014)
+3. A system without GLEW, since GLEW support for GLES and EGL is a bit
+   experimental (for example, pkg-config glew will drag in -lGL and -lGLU
+   which we dont want because there is no standard plain-old GLU for GLES yet)
 
 4. Write a MIR client program without dragging in all of the other 
    extraneous build files inside of Ubuntu's 'examples' build system
@@ -74,12 +75,52 @@ run this:
       do echo "---------" $i; ldd $i;
     done
 
+##what about Wayland and Weston, they can be used to draw EGL without X11 too?
+
+Unfortunately simple Wayland / Weston demo programs are unbuildable on 
+standard Ubuntu 14.04 as of writing (mid 2014) due to a breakage in 
+backwards compatability requiring libwayland to be rebuilt from source 
+from the github 'master' version. 
+
+https://www.mail-archive.com/wayland-devel@lists.freedesktop.org/msg14995.html
+
+This is a bit of a challenge on Ubuntu because removing the wayland 
+package will remove a whole lot of other stuff too.
+
+It is entirely possible to do it, if you mess around with git and keep 
+the wayland you build separate from the wayland that comes standard with 
+ubuntu, but.. i will leave that for someone else to do.
+
 ##see also
 
+Joe's Masterful Tutorial:
+
 *http://duriansoftware.com/joe/An-intro-to-modern-OpenGL.-Chapter-2:-Hello-World:-The-Slideshow.html
+
+GLES and the #version and precision thing:
+
 *http://stackoverflow.com/questions/10383113/differences-between-glsl-and-glsl-es-2
 *http://stackoverflow.com/questions/23853345/qt-desktop-shader-compilation-issue
+
+Mir and Wayland vs X11:
+
 *http://shnatsel.blogspot.com/2013/03/why-your-desktop-wont-be-running.html
+
+GLES vs plain old GL:
+
+*http://pandorawiki.org/Porting_to_GLES_from_GL
+
+GLU with GLES:
+
+*http://stackoverflow.com/questions/7589563/can-i-use-glu-with-android-ndk
+
+GLEW and GLES:
+
+*http://www.raspberrypi.org/forums/viewtopic.php?t=64028&p=476718
+
+The Home of Ubuntu's MIR:
+
+*http://unity.ubuntu.com/mir/
 
 ##copyright license
 
@@ -107,8 +148,7 @@ The Ubuntu MIR code is under a GPL license as follows:
  */
 ```
 
-Most of the Ubuntu MIR stuff also includes the following note on Author:
+Most of the Ubuntu MIR stuff also lists the Author as Daniel van Vugt 
+<daniel.van.vugt@canonical.com>
 
-* Author: Daniel van Vugt <daniel.van.vugt@canonical.com>
-
-
+Modifications to the code have been made by me! ( http://github.com/donbright )
