@@ -13,8 +13,11 @@ This allows us to explore the following:
 
 0. Handle GL context with EGL and Ubuntu's MIR, instead of X11's GLX.
 
-1. GLESv2 instead of 'standard' OpenGL (EGL support for 'Real' OpenGL
-   is not quite yet ready for prime-time as of writing, mid 2014)
+1. GLESv2 instead of 'standard' OpenGL (EGL support for 'Ordinary' 
+   OpenGL is a bit of a tricky thing at the moment, mid 2014, requiring
+   some special build settings that i didnt feel like looking up. also
+   GLESv2 is what they are using on tablets, raspb pi, etc, so thats kinda
+   cool)
 
 2. Since GLESv2 deprecates alot of the same stuff as OpenGL3, this allows
    to test a kind of 'updated' non-deprecated GL system
@@ -121,6 +124,10 @@ GLEW and GLES:
 The Home of Ubuntu's MIR:
 
 *http://unity.ubuntu.com/mir/
+
+What platforms is GLESv2 and GLESv3 used on?
+
+*http://en.wikipedia.org/wiki/OpenGL_ES#OpenGL_ES_2.0_2
 
 ##copyright license
 
