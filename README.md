@@ -22,6 +22,9 @@ This allows us to explore the following:
 3. A system without GLEW, since GLEW support for GLES and EGL is experimental
    and not 'standard' on most systems as of writing (mid 2014)
 
+4. Write a MIR client program without dragging in all of the other 
+   extraneous build files inside of Ubuntu's 'examples' build system
+
 ##How do I build?
 
 You need to install MIR first.
@@ -78,6 +81,34 @@ run this:
 *http://stackoverflow.com/questions/23853345/qt-desktop-shader-compilation-issue
 *http://shnatsel.blogspot.com/2013/03/why-your-desktop-wont-be-running.html
 
-Joe's code is under a "Do Whatever You Like" License. The Ubuntu MIR 
-code is under a GPL license.
+##copyright license
+
+Joe's code is under a "Do Whatever You Like" License.
+
+The Ubuntu MIR code is under a GPL license as follows:
+
+
+```
+/*
+ * Copyright © 2013 Canonical Ltd.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 3 as
+ * published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ */
+```
+
+Most of the Ubuntu MIR stuff also includes the following note on Author:
+
+* Author: Daniel van Vugt <daniel.van.vugt@canonical.com>
+
 
