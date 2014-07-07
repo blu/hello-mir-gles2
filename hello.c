@@ -198,8 +198,8 @@ static int make_resources(void)
         sizeof(g_element_buffer_data)
     );
 
-    g_resources.textures[0] = make_texture("hello1.tga");
-    g_resources.textures[1] = make_texture("hello2.tga");
+    g_resources.textures[1] = make_texture("hello1.tga");
+    g_resources.textures[0] = make_texture("hello2.tga");
 
     fprintf(stderr,"make res stage 2\n");
     fflush(stderr);
@@ -255,6 +255,7 @@ static void update_fade_factor(void)
     clock_gettime(CLOCK_MONOTONIC, &t);
     long int milliseconds = t.tv_nsec / 1.0e6;
     //int milliseconds = 1;//glutGet(GLUT_ELAPSED_TIME);
+    //milliseconds += 400;
     g_resources.fade_factor = sinf((float)milliseconds * 0.001f) * 0.5f + 0.5f;
     //glutPostRedisplay();
 }
@@ -325,6 +326,7 @@ int main(int argc, char *argv[])
     {
 	fprintf(stderr,"loop\n");
 	update_fade_factor();
+        usleep( 10000 );
 	render();
 
 //        glClearColor(1.0f, 0.0f, 0.0f, mir_eglapp_background_opacity);

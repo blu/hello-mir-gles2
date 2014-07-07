@@ -64,10 +64,7 @@ For a non-X11 do this:
 * Switch back to VT2, its probably corrupted now
 * Switch back to X11 to clear screen (alt-right, alt-right, repeatedly)
 
-##does it work properly?
-
-Not quite. You can get an image on screen, but it doesn't transform like 
-Joe's example in 'ordinary' OpenGL 3.0.
+To stop the program you have to ctrl-c, switch to the MIR server VT, then switch back to the VT2.
 
 ##But I ran ldd on the binary and it shows its linked to X??? I thought this was supposed to be X-free?
 
