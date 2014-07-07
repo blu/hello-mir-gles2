@@ -19,7 +19,7 @@ target_link_libraries(eglapp
   "-lm"
 )
 add_executable(hello_mir_gles2
-  eglflash.c
+  hello.c
 )
 target_link_libraries(hello_mir_gles2
   eglapp
