@@ -1,7 +1,7 @@
 ##hello-mir-gles2
 
-This is a very basic example showing some GLSL GLESv2 example code
-running on Ubuntu MIR using EGL. 
+This is a very basic computer graphics example using the EGL, GLESv2, and
+Ubuntu MIR system tools.
 
 It combines code from Joe Groff's OpenGL tutorial with code from Daniel 
 van Vugt, of Canonical Inc, from Ubuntu MIR's demos.
