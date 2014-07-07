@@ -1,4 +1,4 @@
-# hello-mir-gles2
+##hello-mir-gles2
 
 This is a very basic example showing some GLSL GLESv2 example code
 running on Ubuntu MIR using EGL. 
@@ -18,7 +18,7 @@ allows us to explore the following:
 3. A system without GLEW, since GLEW support for GLES and EGL is experimental
    and not 'standard' on most systems as of writing (mid 2014)
 
-#How do I build?
+##How do I build?
 
 You need to install MIR first.
 
@@ -37,7 +37,7 @@ Now do this
     cmake ..
     make
 
-#MIR? how do you run this program under MIR?
+##MIR? how do you run this program under MIR?
 
 See http://unity.ubuntu.com/mir/using_mir_on_pc.html
 
@@ -53,12 +53,12 @@ For a non-X11 do this:
 *Switch back to VT2, its probably corrupted now
 *Switch back to X11 to clear screen (alt-right, alt-right, repeatedly)
 
-#does it work properly?
+##does it work properly?
 
 Not quite. You can get an image on screen, but it doesn't transform like 
 Joe's example in 'ordinary' OpenGL 3.0.
 
-#But I ran ldd on the binary and it shows its linked to X??? I thought this was supposed to be X-free?
+##But I ran ldd on the binary and it shows its linked to X??? I thought this was supposed to be X-free?
 
 EGL shipping with Ubuntu currently is linked to X. (mid-2014). For Proof 
 run this:
@@ -67,7 +67,7 @@ run this:
       do echo "---------" $i; ldd $i;
     done
 
-#see also
+##see also
 
 *http://duriansoftware.com/joe/An-intro-to-modern-OpenGL.-Chapter-2:-Hello-World:-The-Slideshow.html
 *http://stackoverflow.com/questions/10383113/differences-between-glsl-and-glsl-es-2
