@@ -28,6 +28,15 @@ Then you need some other tools:
 
     sudo apt-get install build-essential pkg-config cmake
 
+Now do this
+
+    git clone http://github.com/donbright/hello-mir-gles2
+    cd hello-mir-gles2
+    mkdir bin
+    cd bin
+    cmake ..
+    make
+
 #MIR? how do you run this program under MIR?
 
 See http://unity.ubuntu.com/mir/using_mir_on_pc.html
