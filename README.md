@@ -1,6 +1,6 @@
 ##hello-mir-gles2
 
-This is a rudimentary primer of GLESv2 via EGL on Ubuntu Mir. It's also an example of self-hosted development on Ubuntu Touch.
+This is a rudimentary primer of GLES2 via EGL on Ubuntu Mir. It's also an example of self-hosted development on Ubuntu Touch.
 
 It derives from [Don Bright's Mir/GLES2 adaptation](https://github.com/donbright/hello-mir-gles2) of [Joe Groff's OpenGL tutorial](http://duriansoftware.com/joe/An-intro-to-modern-OpenGL.-Chapter-2:-Hello-World:-The-Slideshow.html), with [Mir/EGL code from Daniel van Vugt](http://bazaar.launchpad.net/~mir-team/mir/utopic/view/head:/examples/eglflash.c), of Canonical Inc.
 
@@ -29,7 +29,7 @@ Voila, you should have a hello-egl icon in your Apps pane; the app itself sits u
 
 	/opt/click.ubuntu.com/hello-egl/
 
-The primer runs in both normal and desktop mode, and loops endlessly. To stop the program press 'ESC' on a kbd (if you have one attached/paired) or left-side swipe to bring up Launcher and do a quit from there.
+The primer runs in both normal and desktop mode, and loops endlessly. To stop the program press 'ESC' on a kbd (if you have one attached/paired) or left-side swipe to bring up Launcher and quit from there.
 The system restart is necessary only the first time - subsequent builds don't need it - just build and then launch from the icon. Logs from a run session can be seen under:
 
 	~/.cache/upstart/application-click-hello-egl_hello-egl_0.1.log 
