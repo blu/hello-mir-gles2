@@ -1,7 +1,9 @@
-// Baased on code from Joe Groff's tutorial posted at Durian Software
-// see http://duriansoftware.com/joe/An-intro-to-modern-OpenGL.-Chapter-2:-Hello-World:-The-Slideshow.html
-
-// Also based on:
+// Based on code by Don Bright
+// see https://github.com/donbright/hello-mir-gles2
+// Based on code by Joe Groff
+// see https://github.com/jckarter/hello-gl
+// Based on code by Daniel van Vugt <daniel.van.vugt@canonical.com>
+// original license follows:
 
 /*
  * Trivial GL demo; flashes the screen. Showing how simple life is with eglapp.
@@ -23,32 +25,26 @@
  * Author: Daniel van Vugt <daniel.van.vugt@canonical.com>
  */
 
-// Modified by don bright <http://github.com/donbright> 2014
-
 #include <time.h>
 #include <math.h>
 #include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
-//#include <GL/glew.h>
-#include "eglapp.h"
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
-#define GL_RGB8 GL_RGB8_OES
-#define GL_BGR 0x80e0
-#include "util.h"
+
+#include "eglapp.h"
 
 /*
  * Global data used by our render callback:
  */
-
 static struct {
     GLuint vertex_buffer, element_buffer;
     GLuint textures[2];
     GLuint vertex_shader, fragment_shader, program;
     
     struct {
-        GLint fade_factor;
+        GLint blend_factor;
         GLint textures[2];
     } uniforms;
 
@@ -56,7 +52,7 @@ static struct {
         GLint position;
     } attributes;
 
-    GLfloat fade_factor;
+    GLfloat blend_factor;
 } g_resources;
 
 /*
@@ -65,8 +61,8 @@ static struct {
 static GLuint make_buffer(
     GLenum target,
     const void *buffer_data,
-    GLsizei buffer_size
-) {
+    GLsizei buffer_size)
+{
     GLuint buffer;
     glGenBuffers(1, &buffer);
     glBindBuffer(target, buffer);
@@ -74,79 +70,61 @@ static GLuint make_buffer(
     return buffer;
 }
 
-static GLuint make_texture(const char *filename)
+static GLchar *file_contents(const char *filename, GLint *length)
 {
-    int width, height;
-    void *pixels = read_tga(filename, &width, &height);
-    GLuint texture;
+	FILE *f = fopen(filename, "r");
 
-    if (!pixels)
-        return 0;
+	if (!f) {
+	    fprintf(stderr, "Unable to open %s for reading\n", filename);
+	    return NULL;
+	}
 
-    glGenTextures(1, &texture);
-    glBindTexture(GL_TEXTURE_2D, texture);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S,     GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T,     GL_CLAMP_TO_EDGE);
-    glTexImage2D(
-        GL_TEXTURE_2D, 0,           /* target, level */
-        GL_RGB8,                    /* internal format */
-        width, height, 0,           /* width, height, border */
-        GL_BGR, GL_UNSIGNED_BYTE,   /* external format, type */
-        pixels                      /* pixels */
-    );
-    free(pixels);
-    return texture;
+	fseek(f, 0, SEEK_END);
+	const size_t fileLen = ftell(f);
+	fseek(f, 0, SEEK_SET);
+
+	GLchar *buffer = (GLchar*) malloc(fileLen);
+	const size_t readLen = fread(buffer, 1, fileLen, f);
+	fclose(f);
+
+	if (fileLen != readLen) {
+		free(buffer);
+		*length = 0;
+		fprintf(stderr, "Failed reading file %s\n", filename);
+		return NULL;
+	}
+
+	*length = GLint(readLen);
+	return buffer;
 }
-
-/*
-static void show_info_log(
-    GLuint object,
-    PFNGLGETSHADERIVPROC glGet__iv,
-    PFNGLGETSHADERINFOLOGPROC glGet__InfoLog
-)
-{
-    GLint log_length;
-    char *log;
-
-    glGet__iv(object, GL_INFO_LOG_LENGTH, &log_length);
-    log = malloc(log_length);
-    glGet__InfoLog(object, log_length, NULL, log);
-    fprintf(stderr, "%s", log);
-    free(log);
-}
-*/
 
 static GLuint make_shader(GLenum type, const char *filename)
 {
-    GLint length;
-    GLchar *source = file_contents(filename, &length);
-    GLuint shader;
-    GLint shader_ok;
+	GLint length;
+	GLchar *source = file_contents(filename, &length);
 
-    if (!source)
-        return 0;
+	if (!source)
+		return 0;
 
-    shader = glCreateShader(type);
-    glShaderSource(shader, 1, (const GLchar**)&source, &length);
-    free(source);
-    glCompileShader(shader);
+	const GLuint shader = glCreateShader(type);
+	glShaderSource(shader, 1, &source, &length);
+	glCompileShader(shader);
+	free(source);
 
-    glGetShaderiv(shader, GL_COMPILE_STATUS, &shader_ok);
-    if (!shader_ok) {
-        fprintf(stderr, "Failed to compile %s:\n", filename);
-            GLchar log[1024];
-            glGetShaderInfoLog(shader, sizeof log - 1, NULL, log);
-            log[sizeof log - 1] = '\0';
-            printf("load_shader compile failed: %s\n", log);
-            glDeleteShader(shader);
-            shader = 0;
-        //show_info_log(shader, glGetShaderiv, glGetShaderInfoLog);
-//        glDeleteShader(shader);
-        return 0;
-    }
-    return shader;
+	GLint shader_ok;
+	glGetShaderiv(shader, GL_COMPILE_STATUS, &shader_ok);
+
+	if (!shader_ok) {
+		GLint logLen;
+		glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &logLen);
+		GLchar *log = (GLchar*) alloca(sizeof(GLchar) * logLen);
+		glGetShaderInfoLog(shader, logLen, NULL, log);
+		fprintf(stderr, "Failed to compile %s:\n%*s\n", filename, logLen, log);
+		glDeleteShader(shader);
+		return 0;
+	}
+
+	return shader;
 }
 
 static GLuint make_program(GLuint vertex_shader, GLuint fragment_shader)
@@ -161,8 +139,7 @@ static GLuint make_program(GLuint vertex_shader, GLuint fragment_shader)
 
     glGetProgramiv(program, GL_LINK_STATUS, &program_ok);
     if (!program_ok) {
-        fprintf(stderr, "Failed to link shader program:\n");
-        //show_info_log(program, glGetProgramiv, glGetProgramInfoLog);
+        fprintf(stderr, "Failed to link shader program\n");
         glDeleteProgram(program);
         return 0;
     }
@@ -186,7 +163,7 @@ static const GLushort g_element_buffer_data[] = { 0, 1, 2, 3 };
 static int make_resources(void)
 {
     fprintf(stderr,"make res stage 1\n");
-    fflush(stderr);
+
     g_resources.vertex_buffer = make_buffer(
         GL_ARRAY_BUFFER,
         g_vertex_buffer_data,
@@ -198,75 +175,68 @@ static int make_resources(void)
         sizeof(g_element_buffer_data)
     );
 
-    g_resources.textures[1] = make_texture("hello1.tga");
-    g_resources.textures[0] = make_texture("hello2.tga");
-
     fprintf(stderr,"make res stage 2\n");
-    fflush(stderr);
-    if (g_resources.textures[0] == 0 || g_resources.textures[1] == 0)
-        return 0;
+
+    g_resources.textures[0] = 0;
+    g_resources.textures[1] = 0;
 
     fprintf(stderr,"make res stage 3\n");
-    fflush(stderr);
+
     g_resources.vertex_shader = make_shader(
-        GL_VERTEX_SHADER,
-        "hello-gl.v.glsl"
-    );
+        GL_VERTEX_SHADER, "hello-gl.v.glsl");
+
     if (g_resources.vertex_shader == 0)
         return 0;
 
     fprintf(stderr,"make res stage 4\n");
-    fflush(stderr);
+
     g_resources.fragment_shader = make_shader(
-        GL_FRAGMENT_SHADER,
-        "hello-gl.f.glsl"
-    );
+        GL_FRAGMENT_SHADER, "hello-gl.f.glsl");
+
     if (g_resources.fragment_shader == 0)
         return 0;
 
     fprintf(stderr,"make res stage 5\n");
-    fflush(stderr);
+
     g_resources.program = make_program(g_resources.vertex_shader, g_resources.fragment_shader);
+
     if (g_resources.program == 0)
         return 0;
 
     fprintf(stderr,"make res stage 6\n");
-    fflush(stderr);
-    g_resources.uniforms.fade_factor
-        = glGetUniformLocation(g_resources.program, "fade_factor");
+
+    g_resources.uniforms.blend_factor
+        = glGetUniformLocation(g_resources.program, "blend_factor");
     g_resources.uniforms.textures[0]
         = glGetUniformLocation(g_resources.program, "textures[0]");
     g_resources.uniforms.textures[1]
         = glGetUniformLocation(g_resources.program, "textures[1]");
 
     fprintf(stderr,"make res stage 7\n");
-    fflush(stderr);
+
     g_resources.attributes.position
         = glGetAttribLocation(g_resources.program, "position");
 
     return 1;
 }
 
-/////// 2 main loop functions
-
-static void update_fade_factor(void)
+static void update_blend_factor(void)
 {
     struct timespec t;
     clock_gettime(CLOCK_MONOTONIC, &t);
-    long int milliseconds = t.tv_nsec / 1.0e6;
-    //int milliseconds = 1;//glutGet(GLUT_ELAPSED_TIME);
-    //milliseconds += 400;
-    g_resources.fade_factor = sinf((float)milliseconds * 0.001f) * 0.5f + 0.5f;
-    //glutPostRedisplay();
+    const float nsec = t.tv_nsec / 1e9;
+    g_resources.blend_factor = sinf(nsec * float(M_PI * 2.0)) * .5f + .5f;
 }
 
 static void render(void)
 {
     glUseProgram(g_resources.program);
 
-    glUniform1f(g_resources.uniforms.fade_factor, g_resources.fade_factor);
+    glUniform1f(g_resources.uniforms.blend_factor, g_resources.blend_factor);
     
+#if 0
     glActiveTexture(GL_TEXTURE0);
+
     glBindTexture(GL_TEXTURE_2D, g_resources.textures[0]);
     glUniform1i(g_resources.uniforms.textures[0], 0);
 
@@ -274,6 +244,7 @@ static void render(void)
     glBindTexture(GL_TEXTURE_2D, g_resources.textures[1]);
     glUniform1i(g_resources.uniforms.textures[1], 1);
 
+#endif
     glBindBuffer(GL_ARRAY_BUFFER, g_resources.vertex_buffer);
     glVertexAttribPointer(
         g_resources.attributes.position,  /* attribute */
@@ -294,59 +265,39 @@ static void render(void)
     );
 
     glDisableVertexAttribArray(g_resources.attributes.position);
-//    glutSwapBuffers();
 }
 
-int main(int argc, char *argv[])
+int main(int argc, char **argv)
 {
-    fprintf(stderr, "begin..\n");
-    fflush(stderr);
-    unsigned int width = 400, height = 300; // match .tga files
-
-//    glewInit();
-/*
-    if (!GLEW_VERSION_2_0) {
-        fprintf(stderr, "OpenGL 2.0 not available\n");
-        return 1;
-    }
-*/
-
     fprintf(stderr, "init..\n");
-    if (!mir_eglapp_init(argc, argv, &width, &height))
+
+    if (!eglapp_init(argc, argv))
         return 1;
 
     fprintf(stderr, "make resources..\n");
+
     if (!make_resources()) {
         fprintf(stderr, "Failed to load resources\n");
         return 1;
     }
 
+	fprintf(stderr, "zooming..\n");
+
+	while (eglapp_zooming()) {
+		usleep(16000);
+		eglapp_swap_buffers();
+	}
+
     fprintf(stderr, "loop..\n");
-    while (mir_eglapp_running())
-    {
-	fprintf(stderr,"loop\n");
-	update_fade_factor();
-        usleep( 10000 );
-	render();
 
-//        glClearColor(1.0f, 0.0f, 0.0f, mir_eglapp_background_opacity);
-//        glClear(GL_COLOR_BUFFER_BIT);
-        mir_eglapp_swap_buffers();
-        //sleep(1);
-/*
-        glClearColor(0.0f, 1.0f, 0.0f, mir_eglapp_background_opacity);
-        glClear(GL_COLOR_BUFFER_BIT);
-        mir_eglapp_swap_buffers();
-        sleep(1);
+	glViewport(GLint(0), GLint(0), GLsizei(eglapp_target_width()), GLsizei(eglapp_target_height()));
 
-        glClearColor(0.0f, 0.0f, 1.0f, mir_eglapp_background_opacity);
-        glClear(GL_COLOR_BUFFER_BIT);
-        mir_eglapp_swap_buffers();
-        sleep(1);
-*/
+    while (eglapp_running()) {
+		update_blend_factor();
+		render();
+		eglapp_swap_buffers();
     }
 
-    mir_eglapp_shutdown();
-
+    eglapp_shutdown();
     return 0;
 }

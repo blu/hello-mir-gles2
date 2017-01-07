@@ -1,0 +1,15 @@
+{
+    "architecture": "armhf",
+    "description": "hello-egl",
+    "framework": "ubuntu-sdk-15.04",
+    "hooks": {
+        "hello-egl": {
+            "apparmor": "hello-egl.apparmor",
+            "desktop": "hello-egl.desktop"
+        }
+    },
+    "maintainer": "Martin Krastev <blu.dark@gmail.com>",
+    "name": "hello-egl",
+    "title": "hello-egl",
+    "version": "0.1"
+}
