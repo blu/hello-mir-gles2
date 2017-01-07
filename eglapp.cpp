@@ -84,15 +84,15 @@ void eglapp_shutdown(void)
 
 static void shutdown(int signum)
 {
-    if (running) {
-        running = 0;
-        printf("Signal %d received. Good night.\n", signum);
-    }
+	if (running) {
+		running = 0;
+		printf("Signal %d received. Good night.\n", signum);
+	}
 }
 
 bool eglapp_running(void)
 {
-    return running;
+	return running;
 }
 
 bool eglapp_zooming(void)
@@ -102,32 +102,10 @@ bool eglapp_zooming(void)
 
 void eglapp_swap_buffers(void)
 {
-#if 0
-    static time_t lasttime = 0;
-    static int lastcount = 0;
-    static int count = 0;
-    time_t now = time(NULL);
-    time_t dtime;
-    int dcount;
+	if (!running)
+		return;
 
-#endif
-    if (!running)
-        return;
-
-    eglSwapBuffers(egl.display, egl.surface);
-
-#if 0
-    count++;
-    dcount = count - lastcount;
-    dtime = now - lasttime;
-    if (dtime)
-    {
-        printf("%d FPS\n", dcount);
-        lasttime = now;
-        lastcount = count;
-    }
-
-#endif
+	eglSwapBuffers(egl.display, egl.surface);
 }
 
 static void eglapp_handle_input(MirSurface* /*surface*/, MirEvent const* ev, void* /*context*/)
@@ -217,7 +195,7 @@ static unsigned int bpp_from_pixel_format(
 	case mir_pixel_format_rgba_5551:
 	case mir_pixel_format_rgba_4444:
 		return 16;
-    }
+	}
 	return 0;
 }
 
@@ -238,18 +216,18 @@ static bool parse_cli(
 	MirSurfaceParameters &surfParam,
 	EGLint &swapinterval)
 {
-    if (argc == 1)
+	if (argc == 1)
 		return true;
 
 	bool help = false;
 
 	for (int i = 1; i < argc && !help; ++i) {
-	    const char *arg = argv[i];
+		const char *arg = argv[i];
 	
-	    if (arg[0] != '-' || arg[1] == '\0') {
-	        help = true;
+		if (arg[0] != '-' || arg[1] == '\0') {
+			help = true;
 			continue;
-	    }
+		}
 
 		if (0 == strcmp(arg + 1, "n")) {
 			swapinterval = 0;
@@ -279,10 +257,10 @@ static bool parse_cli(
 	if (help) {
 		printf(
 			"Usage: %s [<options>]\n"
-			"  -h               Show this help text\n"
-			"  -f               Force full screen\n"
-			"  -n               Don't sync to vblank\n"
-			"  -s WIDTHxHEIGHT  Force surface size\n",
+			"  -h				Show this help text\n"
+			"  -f				Force full screen\n"
+			"  -n				Don't sync to vblank\n"
+			"  -s WIDTHxHEIGHT	Force surface size\n",
 			argv[0]);
 	}
 
@@ -290,29 +268,29 @@ static bool parse_cli(
 }
 
 #define CHECK(_cond, _err) \
-    if (!(_cond)) { \
-        printf("%s\n", (_err)); \
-        return false; \
-    }
+	if (!(_cond)) { \
+		printf("%s\n", (_err)); \
+		return false; \
+	}
 
 bool eglapp_init(int argc, char **argv)
 {
-    MirSurfaceParameters surfParam = {
-        "eglappsurface",
-        512,
+	MirSurfaceParameters surfParam = {
+		"eglappsurface",
 		512,
-        mir_pixel_format_xbgr_8888,
-        mir_buffer_usage_hardware,
-        mir_display_output_id_invalid
-    };
-    EGLint swapinterval = 1;
+		512,
+		mir_pixel_format_xbgr_8888,
+		mir_buffer_usage_hardware,
+		mir_display_output_id_invalid
+	};
+	EGLint swapinterval = 1;
 
 	if (!parse_cli(argc, argv, surfParam, swapinterval)) {
 		return false;
 	}
 
-    mir.connection = mir_connect_sync(NULL, appname);
-    CHECK(mir_connection_is_valid(mir.connection), "Can't get connection");
+	mir.connection = mir_connect_sync(NULL, appname);
+	CHECK(mir_connection_is_valid(mir.connection), "Can't get connection");
 
 	{
 		MirDisplayConfiguration* displayConfig = mir_connection_create_display_config(mir.connection);
@@ -364,21 +342,21 @@ bool eglapp_init(int argc, char **argv)
 		EGL_NONE
 	};
 
-    EGLint configCount;
+	EGLint configCount;
 	ok = eglChooseConfig(display, configAttribs, NULL, 0, &configCount);
 	CHECK(ok, "Could not eglChooseConfig");
 
-    EGLConfig* config = (EGLConfig*) alloca(configCount * sizeof(EGLConfig));
-    ok = eglChooseConfig(display, configAttribs, config, configCount, &configCount);
+	EGLConfig* config = (EGLConfig*) alloca(configCount * sizeof(EGLConfig));
+	ok = eglChooseConfig(display, configAttribs, config, configCount, &configCount);
 	CHECK(ok, "Could not eglChooseConfig (2)");
 
-    const EGLint contextAttribs[] = {
-        EGL_CONTEXT_CLIENT_VERSION, 2,
-        EGL_NONE
-    };
+	const EGLint contextAttribs[] = {
+		EGL_CONTEXT_CLIENT_VERSION, 2,
+		EGL_NONE
+	};
 
-    EGLContext context = eglCreateContext(display, config[0], EGL_NO_CONTEXT, contextAttribs);
-    CHECK(context != EGL_NO_CONTEXT, "eglCreateContext failed");
+	EGLContext context = eglCreateContext(display, config[0], EGL_NO_CONTEXT, contextAttribs);
+	CHECK(context != EGL_NO_CONTEXT, "eglCreateContext failed");
 
 	surfParam.pixel_format = mir_connection_get_egl_pixel_format(
 		mir.connection, display, config[0]);
