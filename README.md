@@ -36,7 +36,7 @@ The system restart is necessary only the first time - subsequent builds don't ne
 
 ##Copyrights & licenses
 
-Joe Groff's code is under a "Do Whatever You Like" License, and so is my part; I can only assume Don Bright shares that; Daniel van Vugt's code is under GPL3, though, which means the entire primer is effectively GPL3:
+Joe Groff's code is under a "Do Whatever You Like" license, and so is my part; I can only assume Don Bright shares that; Daniel van Vugt's code is under GPL3, though, which means the entire primer is effectively GPL3:
 
 ```
 /*

@@ -1,6 +1,9 @@
 #!/bin/bash
 
 CLICK=click_resource
+CLICK_PACKAGE=hello-egl_0.1_armhf.click
+RUN_LOG=~/.cache/upstart/application-click-hello-egl_hello-egl_0.1.log
+
 TARGET=${CLICK}/hello-egl
 SOURCE=(
 	eglapp.cpp
@@ -20,10 +23,7 @@ DEPEND=(
 	/usr/lib/arm-linux-gnueabihf/libmirclient.so.9
 )
 
-g++-4.9 ${SOURCE[@]} ${CFLAGS[@]} ${DEPEND[@]} && click build ${CLICK} && pkcon install-local --allow-untrusted hello-egl_0.1_armhf.click
-
-CLICK_PACKAGE=hello-egl_0.1_armhf.click
-RUN_LOG=~/.cache/upstart/application-click-hello-egl_hello-egl_0.1.log
+g++-4.9 ${SOURCE[@]} ${CFLAGS[@]} ${DEPEND[@]} && click build ${CLICK} && pkcon install-local --allow-untrusted ${CLICK_PACKAGE}
 
 if [ -f $TARGET ]; then
 	rm $TARGET
