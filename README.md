@@ -25,14 +25,14 @@ The build itself:
 	$ ./build.sh
 	$ sudo reboot
 
-Voila, you should have a hello-egl icon in your Apps pane; the app itself sits under:
+Voila, you should have a hello-gles icon in your Apps pane; the app itself sits under:
 
-	/opt/click.ubuntu.com/hello-egl/
+	/opt/click.ubuntu.com/hello-gles/
 
 The primer runs in both normal and desktop mode, and loops endlessly. To stop the program press 'ESC' on a kbd (if you have one attached/paired) or left-side swipe to bring up Launcher and quit from there.
 The system restart is necessary only the first time - subsequent builds don't need it - just build and then launch from the icon. Logs from a run session can be seen under:
 
-	~/.cache/upstart/application-click-hello-egl_hello-egl_0.1.log 
+	~/.cache/upstart/application-click-hello-gles_hello-gles_0.1.log
 
 ##Copyrights & licenses
 
