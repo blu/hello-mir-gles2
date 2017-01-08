@@ -25,7 +25,7 @@ The build itself:
 	$ ./build.sh
 	$ sudo reboot
 
-Voila, you should have a hello-gles icon in your Apps pane; the app itself sits under:
+Voila, you should have a 'hello-gles' icon in your Apps pane; the app itself sits under:
 
 	/opt/click.ubuntu.com/hello-gles/
 
