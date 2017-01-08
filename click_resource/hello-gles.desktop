@@ -1,8 +1,8 @@
 [Desktop Entry]
-Name=hello-egl
-Comment=hello-egl
-Exec=hello-egl -f
-Icon=hello-egl.png
+Name=hello-gles
+Comment=hello-gles
+Exec=hello-gles -f
+Icon=hello-gles.png
 Terminal=false
 Type=Application
 X-Ubuntu-Touch=true
