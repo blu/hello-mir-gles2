@@ -6,7 +6,7 @@ It derives from [Don Bright's Mir/GLES2 adaptation](https://github.com/donbright
 
 This primer aims to:
 
-* Do GLES2 via EGL on Ubuntu Mir in the most minimalistic way possible - no QtMir or any other toolkits.
+* Do GLES2 via EGL on Ubuntu Mir in the most minimalistic way possible - no QtMir or any other UI frameworks.
 * Explore the possibilities for self-hosted GLES2 development on Ubuntu Touch
 
 ##How to build on Ubuntu Touch
@@ -25,7 +25,7 @@ The build itself:
 	$ ./build.sh
 	$ sudo reboot
 
-Voila, you should have a 'hello-gles' icon in your Apps pane; the app itself sits under:
+Voila, you should have a `hello-gles` icon in your Apps pane; the app itself sits under:
 
 	/opt/click.ubuntu.com/hello-gles/
 
