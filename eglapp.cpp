@@ -65,18 +65,31 @@ int eglapp_target_height()
 
 void eglapp_shutdown(void)
 {
-	eglMakeCurrent(egl.display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
-	eglTerminate(egl.display);
+	if (EGL_NO_SURFACE != egl.surface) {
+		eglDestroySurface(egl.display, egl.surface);
+		egl.surface = EGL_NO_SURFACE;
+	}
 
-	if (mir.surface != NULL) {
+	if (EGL_NO_CONTEXT != egl.context) {
+		eglDestroyContext(egl.display, egl.context);
+		egl.context = EGL_NO_CONTEXT;
+	}
+
+	if (EGL_NO_DISPLAY != egl.display) {
+		eglMakeCurrent(egl.display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
+		eglTerminate(egl.display);
+		egl.display = EGL_NO_DISPLAY;
+	}
+
+	if (NULL != mir.surface) {
 		mir_surface_release_sync(mir.surface);
 		mir.surface = NULL;
 	}
-	if (mir.bufferStream != NULL) {
+	if (NULL != mir.bufferStream) {
 		mir_buffer_stream_release_sync(mir.bufferStream);
 		mir.bufferStream = NULL;
 	}
-	if (mir.connection != NULL) {
+	if (NULL != mir.connection) {
 		mir_connection_release(mir.connection);
 		mir.connection = NULL;
 	}

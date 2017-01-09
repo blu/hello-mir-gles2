@@ -34,6 +34,104 @@
 #include <GLES2/gl2ext.h>
 
 #include "eglapp.h"
+#include "utilFile.hpp"
+#include "utilTex.hpp"
+#include "utilMisc.hpp"
+
+namespace util {
+
+static const char* string_from_GL_error(
+	const GLenum error)
+{
+	switch (error) {
+	case GL_NO_ERROR:
+		return "GL_NO_ERROR";
+	case GL_INVALID_ENUM:
+		return "GL_INVALID_ENUM";
+	case GL_INVALID_FRAMEBUFFER_OPERATION:
+		return "GL_INVALID_FRAMEBUFFER_OPERATION";
+	case GL_INVALID_VALUE:
+		return "GL_INVALID_VALUE";
+	case GL_INVALID_OPERATION:
+		return "GL_INVALID_OPERATION";
+	case GL_OUT_OF_MEMORY:
+		return "GL_OUT_OF_MEMORY";
+	}
+
+	return "unknown";
+}
+
+bool reportGLError(FILE* f)
+{
+	const GLenum error = glGetError();
+
+	if (GL_NO_ERROR == error)
+		return false;
+
+	fprintf(f, "GL error: %s\n", string_from_GL_error(error));
+	return true;
+}
+
+static bool reportGLCaps(FILE* f)
+{
+	const GLubyte* str_version	= glGetString(GL_VERSION);
+	const GLubyte* str_vendor	= glGetString(GL_VENDOR);
+	const GLubyte* str_renderer	= glGetString(GL_RENDERER);
+	const GLubyte* str_glsl_ver	= glGetString(GL_SHADING_LANGUAGE_VERSION);
+	const GLubyte* str_exten	= glGetString(GL_EXTENSIONS);
+
+	fprintf(stdout, "gl version, vendor, renderer, glsl version, extensions:"
+		"\n\t%s"
+		"\n\t%s"
+		"\n\t%s"
+		"\n\t%s"
+		"\n\t%s\n",
+		(const char*) str_version,
+		(const char*) str_vendor,
+		(const char*) str_renderer,
+		(const char*) str_glsl_ver,
+		(const char*) str_exten);
+
+	GLint params[2]; // we won't need more than 2
+
+	glGetIntegerv(GL_MAX_TEXTURE_SIZE, params);
+	fprintf(stdout, "GL_MAX_TEXTURE_SIZE: %d\n", params[0]);
+
+	glGetIntegerv(GL_MAX_CUBE_MAP_TEXTURE_SIZE, params);
+	fprintf(stdout, "GL_MAX_CUBE_MAP_TEXTURE_SIZE: %d\n", params[0]);
+
+	glGetIntegerv(GL_MAX_VIEWPORT_DIMS, params);
+	fprintf(stdout, "GL_MAX_VIEWPORT_DIMS: %d, %d\n", params[0], params[1]);
+
+	glGetIntegerv(GL_MAX_RENDERBUFFER_SIZE, params);
+	fprintf(stdout, "GL_MAX_RENDERBUFFER_SIZE: %d\n", params[0]);
+
+	glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, params);
+	fprintf(stdout, "GL_MAX_VERTEX_ATTRIBS: %d\n", params[0]);
+
+	glGetIntegerv(GL_MAX_VERTEX_UNIFORM_VECTORS, params);
+	fprintf(stdout, "GL_MAX_VERTEX_UNIFORM_VECTORS: %d\n", params[0]);
+
+	glGetIntegerv(GL_MAX_VARYING_VECTORS, params);
+	fprintf(stdout, "GL_MAX_VARYING_VECTORS: %d\n", params[0]);
+
+	glGetIntegerv(GL_MAX_FRAGMENT_UNIFORM_VECTORS, params);
+	fprintf(stdout, "GL_MAX_FRAGMENT_UNIFORM_VECTORS: %d\n", params[0]);
+
+	glGetIntegerv(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, params);
+	fprintf(stdout, "GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS: %d\n", params[0]);
+
+	glGetIntegerv(GL_MAX_VERTEX_TEXTURE_IMAGE_UNITS, params);
+	fprintf(stdout, "GL_MAX_VERTEX_TEXTURE_IMAGE_UNITS: %d\n", params[0]);
+
+	glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, params);
+	fprintf(stdout, "GL_MAX_TEXTURE_IMAGE_UNITS: %d\n", params[0]);
+
+	fputc('\n', stdout);
+	return true;
+}
+
+} // namespace util
 
 /*
  * Global data used by our render callback:
@@ -269,10 +367,10 @@ static void render(void)
 
 int main(int argc, char **argv)
 {
-	fprintf(stderr, "init..\n");
-
 	if (!eglapp_init(argc, argv))
 		return 1;
+
+	util::reportGLCaps(stdout);
 
 	fprintf(stderr, "make resources..\n");
 

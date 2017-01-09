@@ -9,6 +9,8 @@ TARGET=${CLICK}/hello-gles
 SOURCE=(
 	eglapp.cpp
 	hello.cpp
+	utilFile.cpp
+	utilTex.cpp
 )
 CFLAGS=(
 	-o ${TARGET}
