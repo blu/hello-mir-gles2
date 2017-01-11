@@ -1,3 +1,6 @@
+// Based on code by Daniel van Vugt <daniel.van.vugt@canonical.com>
+// original license follows:
+
 /*
  * Copyright © 2013 Canonical Ltd.
  *
