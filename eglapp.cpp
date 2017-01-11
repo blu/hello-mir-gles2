@@ -24,6 +24,7 @@
 #include <signal.h>
 #include <time.h>
 #include <string.h>
+#include <assert.h>
 #include <EGL/egl.h>
 #include <xkbcommon/xkbcommon-keysyms.h>
 #include <mir_toolkit/mir_client_library.h>
@@ -359,6 +360,95 @@ static bool parse_cli(
 		return false; \
 	}
 
+static bool reportEGLCaps(
+	const EGLDisplay display,
+	FILE* f)
+{
+	assert(EGL_NO_DISPLAY != display);
+
+	const char* str_version	= eglQueryString(display, EGL_VERSION);
+	const char* str_vendor	= eglQueryString(display, EGL_VENDOR);
+	const char* str_exten	= eglQueryString(display, EGL_EXTENSIONS);
+
+	fprintf(f, "egl version, vendor, extensions:"
+		"\n\t%s"
+		"\n\t%s"
+		"\n\t%s\n",
+		str_version, str_vendor, str_exten);
+
+	EGLConfig config[128];
+	EGLint numConfig;
+
+	EGLBoolean ok = eglGetConfigs(display, config, EGLint(sizeof(config) / sizeof(config[0])), &numConfig);
+	CHECK(ok, "eglGetConfigs failed");
+
+	for (EGLint i = 0; i < numConfig; ++i) {
+		fprintf(f, "\nconfig %d\n", i);
+		EGLint value;
+
+		if (EGL_TRUE != eglGetConfigAttrib(display, config[i], EGL_CONFIG_CAVEAT, &value)) {
+			fprintf(stderr, "eglGetConfigAttrib() failed\n");
+			continue;
+		}
+
+		if (EGL_NON_CONFORMANT_CONFIG == value) {
+			fprintf(f, "non-conformant caveat -- skip\n");
+			continue;
+		}
+
+		static const EGLint attr[] = {
+			EGL_BUFFER_SIZE,
+			EGL_ALPHA_SIZE,
+			EGL_BLUE_SIZE,
+			EGL_GREEN_SIZE,
+			EGL_RED_SIZE,
+			EGL_DEPTH_SIZE,
+			EGL_STENCIL_SIZE,
+			EGL_CONFIG_CAVEAT,
+			EGL_CONFIG_ID,
+			EGL_LEVEL,
+			EGL_MAX_PBUFFER_HEIGHT,
+			EGL_MAX_PBUFFER_PIXELS,
+			EGL_MAX_PBUFFER_WIDTH,
+			EGL_NATIVE_RENDERABLE,
+			EGL_NATIVE_VISUAL_ID,
+			EGL_NATIVE_VISUAL_TYPE,
+			EGL_SAMPLES,
+			EGL_SAMPLE_BUFFERS,
+			EGL_SURFACE_TYPE,
+			EGL_TRANSPARENT_TYPE,
+			EGL_TRANSPARENT_BLUE_VALUE,
+			EGL_TRANSPARENT_GREEN_VALUE,
+			EGL_TRANSPARENT_RED_VALUE,
+			EGL_BIND_TO_TEXTURE_RGB,
+			EGL_BIND_TO_TEXTURE_RGBA,
+			EGL_MIN_SWAP_INTERVAL,
+			EGL_MAX_SWAP_INTERVAL,
+			EGL_LUMINANCE_SIZE,
+			EGL_ALPHA_MASK_SIZE,
+			EGL_COLOR_BUFFER_TYPE,
+			EGL_RENDERABLE_TYPE,
+			EGL_CONFORMANT
+		};
+
+		for (unsigned j = 0; j < sizeof(attr) / sizeof(attr[0]); ++j) {
+			EGLint value;
+
+			if (EGL_TRUE != eglGetConfigAttrib(display, config[i], attr[j], &value)) {
+				fprintf(stderr, "eglGetConfigAttrib() failed (2)\n");
+				continue;
+			}
+
+			fprintf(f, "\t%s: 0x%08x\n", string_from_EGL_attrib(attr[j]), value);
+		}
+	}
+
+	if (numConfig)
+		fputc('\n', f);
+
+	return true;
+}
+
 bool eglapp_init(int argc, char **argv)
 {
 	MirSurfaceParameters surfParam = {
@@ -417,87 +507,7 @@ bool eglapp_init(int argc, char **argv)
 	ok = eglInitialize(display, &major, &minor);
 	CHECK(ok, "eglInitialize failed");
 
-	const char* str_version	= eglQueryString(display, EGL_VERSION);
-	const char* str_vendor	= eglQueryString(display, EGL_VENDOR);
-	const char* str_exten	= eglQueryString(display, EGL_EXTENSIONS);
-
-	fprintf(stdout, "egl version, vendor, extensions:"
-		"\n\t%s"
-		"\n\t%s"
-		"\n\t%s\n",
-		str_version, str_vendor, str_exten);
-
-	{
-		EGLConfig config[128];
-		EGLint numConfig;
-
-		ok = eglGetConfigs(display, config, EGLint(sizeof(config) / sizeof(config[0])), &numConfig);
-		CHECK(ok, "eglGetConfigs failed");
-
-		for (EGLint i = 0; i < numConfig; ++i) {
-			fprintf(stdout, "\nconfig %d\n", i);
-
-			EGLint value;
-
-			if (EGL_TRUE != eglGetConfigAttrib(display, config[i], EGL_CONFIG_CAVEAT, &value)) {
-				fprintf(stderr, "eglGetConfigAttrib() failed\n");
-				continue;
-			}
-
-			if (EGL_NON_CONFORMANT_CONFIG == value) {
-				fprintf(stdout, "non-conformant caveat -- skip\n");
-				continue;
-			}
-
-			static const EGLint attr[] = {
-				EGL_BUFFER_SIZE,
-				EGL_ALPHA_SIZE,
-				EGL_BLUE_SIZE,
-				EGL_GREEN_SIZE,
-				EGL_RED_SIZE,
-				EGL_DEPTH_SIZE,
-				EGL_STENCIL_SIZE,
-				EGL_CONFIG_CAVEAT,
-				EGL_CONFIG_ID,
-				EGL_LEVEL,
-				EGL_MAX_PBUFFER_HEIGHT,
-				EGL_MAX_PBUFFER_PIXELS,
-				EGL_MAX_PBUFFER_WIDTH,
-				EGL_NATIVE_RENDERABLE,
-				EGL_NATIVE_VISUAL_ID,
-				EGL_NATIVE_VISUAL_TYPE,
-				EGL_SAMPLES,
-				EGL_SAMPLE_BUFFERS,
-				EGL_SURFACE_TYPE,
-				EGL_TRANSPARENT_TYPE,
-				EGL_TRANSPARENT_BLUE_VALUE,
-				EGL_TRANSPARENT_GREEN_VALUE,
-				EGL_TRANSPARENT_RED_VALUE,
-				EGL_BIND_TO_TEXTURE_RGB,
-				EGL_BIND_TO_TEXTURE_RGBA,
-				EGL_MIN_SWAP_INTERVAL,
-				EGL_MAX_SWAP_INTERVAL,
-				EGL_LUMINANCE_SIZE,
-				EGL_ALPHA_MASK_SIZE,
-				EGL_COLOR_BUFFER_TYPE,
-				EGL_RENDERABLE_TYPE,
-				EGL_CONFORMANT
-			};
-
-			for (unsigned j = 0; j < sizeof(attr) / sizeof(attr[0]); ++j) {
-				EGLint value;
-
-				if (EGL_TRUE != eglGetConfigAttrib(display, config[i], attr[j], &value)) {
-					fprintf(stderr, "eglGetConfigAttrib() failed (2)\n");
-					continue;
-				}
-
-				fprintf(stdout, "\t%s: 0x%08x\n", string_from_EGL_attrib(attr[j]), value);
-			}
-		}
-		if (numConfig)
-			fputc('\n', stdout);
-	}
+	reportEGLCaps(display, stdout);
 
 	const EGLint configAttribs[] = {
 		EGL_RED_SIZE, 8,

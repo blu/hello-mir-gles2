@@ -78,7 +78,7 @@ static bool reportGLCaps(FILE* f)
 	const GLubyte* str_glsl_ver	= glGetString(GL_SHADING_LANGUAGE_VERSION);
 	const GLubyte* str_exten	= glGetString(GL_EXTENSIONS);
 
-	fprintf(stdout, "gl version, vendor, renderer, glsl version, extensions:"
+	fprintf(f, "gl version, vendor, renderer, glsl version, extensions:"
 		"\n\t%s"
 		"\n\t%s"
 		"\n\t%s"
@@ -93,39 +93,39 @@ static bool reportGLCaps(FILE* f)
 	GLint params[2]; // we won't need more than 2
 
 	glGetIntegerv(GL_MAX_TEXTURE_SIZE, params);
-	fprintf(stdout, "GL_MAX_TEXTURE_SIZE: %d\n", params[0]);
+	fprintf(f, "GL_MAX_TEXTURE_SIZE: %d\n", params[0]);
 
 	glGetIntegerv(GL_MAX_CUBE_MAP_TEXTURE_SIZE, params);
-	fprintf(stdout, "GL_MAX_CUBE_MAP_TEXTURE_SIZE: %d\n", params[0]);
+	fprintf(f, "GL_MAX_CUBE_MAP_TEXTURE_SIZE: %d\n", params[0]);
 
 	glGetIntegerv(GL_MAX_VIEWPORT_DIMS, params);
-	fprintf(stdout, "GL_MAX_VIEWPORT_DIMS: %d, %d\n", params[0], params[1]);
+	fprintf(f, "GL_MAX_VIEWPORT_DIMS: %d, %d\n", params[0], params[1]);
 
 	glGetIntegerv(GL_MAX_RENDERBUFFER_SIZE, params);
-	fprintf(stdout, "GL_MAX_RENDERBUFFER_SIZE: %d\n", params[0]);
+	fprintf(f, "GL_MAX_RENDERBUFFER_SIZE: %d\n", params[0]);
 
 	glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, params);
-	fprintf(stdout, "GL_MAX_VERTEX_ATTRIBS: %d\n", params[0]);
+	fprintf(f, "GL_MAX_VERTEX_ATTRIBS: %d\n", params[0]);
 
 	glGetIntegerv(GL_MAX_VERTEX_UNIFORM_VECTORS, params);
-	fprintf(stdout, "GL_MAX_VERTEX_UNIFORM_VECTORS: %d\n", params[0]);
+	fprintf(f, "GL_MAX_VERTEX_UNIFORM_VECTORS: %d\n", params[0]);
 
 	glGetIntegerv(GL_MAX_VARYING_VECTORS, params);
-	fprintf(stdout, "GL_MAX_VARYING_VECTORS: %d\n", params[0]);
+	fprintf(f, "GL_MAX_VARYING_VECTORS: %d\n", params[0]);
 
 	glGetIntegerv(GL_MAX_FRAGMENT_UNIFORM_VECTORS, params);
-	fprintf(stdout, "GL_MAX_FRAGMENT_UNIFORM_VECTORS: %d\n", params[0]);
+	fprintf(f, "GL_MAX_FRAGMENT_UNIFORM_VECTORS: %d\n", params[0]);
 
 	glGetIntegerv(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, params);
-	fprintf(stdout, "GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS: %d\n", params[0]);
+	fprintf(f, "GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS: %d\n", params[0]);
 
 	glGetIntegerv(GL_MAX_VERTEX_TEXTURE_IMAGE_UNITS, params);
-	fprintf(stdout, "GL_MAX_VERTEX_TEXTURE_IMAGE_UNITS: %d\n", params[0]);
+	fprintf(f, "GL_MAX_VERTEX_TEXTURE_IMAGE_UNITS: %d\n", params[0]);
 
 	glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, params);
-	fprintf(stdout, "GL_MAX_TEXTURE_IMAGE_UNITS: %d\n", params[0]);
+	fprintf(f, "GL_MAX_TEXTURE_IMAGE_UNITS: %d\n", params[0]);
 
-	fputc('\n', stdout);
+	fputc('\n', f);
 	return true;
 }
 
