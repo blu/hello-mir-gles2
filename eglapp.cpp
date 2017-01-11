@@ -162,7 +162,7 @@ static void eglapp_handle_input(MirSurface* /*surface*/, MirEvent const* ev, voi
 	}
 }
 
-static const char* str_from_pixel_format(
+static const char* string_from_pixel_format(
 	const MirPixelFormat pf)
 {
 	switch (pf) {
@@ -187,7 +187,7 @@ static const char* str_from_pixel_format(
 	case mir_pixel_format_rgba_4444:
 		return "mir_pixel_format_rgba_4444";
 	}
-	return "alien-pixel-format";
+	return "unknown-pixel-format";
 }
 
 static unsigned int bpp_from_pixel_format(
@@ -210,6 +210,79 @@ static unsigned int bpp_from_pixel_format(
 		return 16;
 	}
 	return 0;
+}
+
+static const char* string_from_EGL_attrib(
+	const EGLint attr)
+{
+	switch (attr) {
+	case EGL_BUFFER_SIZE:
+		return "EGL_BUFFER_SIZE";
+	case EGL_ALPHA_SIZE:
+		return "EGL_ALPHA_SIZE";
+	case EGL_BLUE_SIZE:
+		return "EGL_BLUE_SIZE";
+	case EGL_GREEN_SIZE:
+		return "EGL_GREEN_SIZE";
+	case EGL_RED_SIZE:
+		return "EGL_RED_SIZE";
+	case EGL_DEPTH_SIZE:
+		return "EGL_DEPTH_SIZE";
+	case EGL_STENCIL_SIZE:
+		return "EGL_STENCIL_SIZE";
+	case EGL_CONFIG_CAVEAT:
+		return "EGL_CONFIG_CAVEAT";
+	case EGL_CONFIG_ID:
+		return "EGL_CONFIG_ID";
+	case EGL_LEVEL:
+		return "EGL_LEVEL";
+	case EGL_MAX_PBUFFER_HEIGHT:
+		return "EGL_MAX_PBUFFER_HEIGHT";
+	case EGL_MAX_PBUFFER_PIXELS:
+		return "EGL_MAX_PBUFFER_PIXELS";
+	case EGL_MAX_PBUFFER_WIDTH:
+		return "EGL_MAX_PBUFFER_WIDTH";
+	case EGL_NATIVE_RENDERABLE:
+		return "EGL_NATIVE_RENDERABLE";
+	case EGL_NATIVE_VISUAL_ID:
+		return "EGL_NATIVE_VISUAL_ID";
+	case EGL_NATIVE_VISUAL_TYPE:
+		return "EGL_NATIVE_VISUAL_TYPE";
+	case EGL_SAMPLES:
+		return "EGL_SAMPLES";
+	case EGL_SAMPLE_BUFFERS:
+		return "EGL_SAMPLE_BUFFERS";
+	case EGL_SURFACE_TYPE:
+		return "EGL_SURFACE_TYPE";
+	case EGL_TRANSPARENT_TYPE:
+		return "EGL_TRANSPARENT_TYPE";
+	case EGL_TRANSPARENT_BLUE_VALUE:
+		return "EGL_TRANSPARENT_BLUE_VALUE";
+	case EGL_TRANSPARENT_GREEN_VALUE:
+		return "EGL_TRANSPARENT_GREEN_VALUE";
+	case EGL_TRANSPARENT_RED_VALUE:
+		return "EGL_TRANSPARENT_RED_VALUE";
+	case EGL_BIND_TO_TEXTURE_RGB:
+		return "EGL_BIND_TO_TEXTURE_RGB";
+	case EGL_BIND_TO_TEXTURE_RGBA:
+		return "EGL_BIND_TO_TEXTURE_RGBA";
+	case EGL_MIN_SWAP_INTERVAL:
+		return "EGL_MIN_SWAP_INTERVAL";
+	case EGL_MAX_SWAP_INTERVAL:
+		return "EGL_MAX_SWAP_INTERVAL";
+	case EGL_LUMINANCE_SIZE:
+		return "EGL_LUMINANCE_SIZE";
+	case EGL_ALPHA_MASK_SIZE:
+		return "EGL_ALPHA_MASK_SIZE";
+	case EGL_COLOR_BUFFER_TYPE:
+		return "EGL_COLOR_BUFFER_TYPE";
+	case EGL_RENDERABLE_TYPE:
+		return "EGL_RENDERABLE_TYPE";
+	case EGL_CONFORMANT:
+		return "EGL_CONFORMANT";
+	}
+
+	return "unknown-egl-attrib";
 }
 
 static const MirDisplayOutput* findActiveOutput(
@@ -318,7 +391,7 @@ bool eglapp_init(int argc, char **argv)
 			mode->vertical_resolution,
 			output->position_x,
 			output->position_y,
-			str_from_pixel_format(output->current_format));
+			string_from_pixel_format(output->current_format));
 
 		if (surfParam.width == 0 || surfParam.height == 0) {
 			surfParam.width = mode->horizontal_resolution;
@@ -334,12 +407,97 @@ bool eglapp_init(int argc, char **argv)
 	eglBindAPI(EGL_OPENGL_ES_API);
 	const EGLNativeDisplayType nativeDisplay = mir_connection_get_egl_native_display(mir.connection);
 	const EGLDisplay display = eglGetDisplay(nativeDisplay);
-	CHECK(display != EGL_NO_DISPLAY, "Can't eglGetDisplay");
+	CHECK(display != EGL_NO_DISPLAY, "eglGetDisplay failed");
 
 	EGLBoolean ok;
 
-	ok = eglInitialize(display, NULL, NULL);
-	CHECK(ok, "Can't eglInitialize");
+	EGLint major;
+	EGLint minor;
+
+	ok = eglInitialize(display, &major, &minor);
+	CHECK(ok, "eglInitialize failed");
+
+	const char* str_version	= eglQueryString(display, EGL_VERSION);
+	const char* str_vendor	= eglQueryString(display, EGL_VENDOR);
+	const char* str_exten	= eglQueryString(display, EGL_EXTENSIONS);
+
+	fprintf(stdout, "egl version, vendor, extensions:"
+		"\n\t%s"
+		"\n\t%s"
+		"\n\t%s\n",
+		str_version, str_vendor, str_exten);
+
+	{
+		EGLConfig config[128];
+		EGLint numConfig;
+
+		ok = eglGetConfigs(display, config, EGLint(sizeof(config) / sizeof(config[0])), &numConfig);
+		CHECK(ok, "eglGetConfigs failed");
+
+		for (EGLint i = 0; i < numConfig; ++i) {
+			fprintf(stdout, "\nconfig %d\n", i);
+
+			EGLint value;
+
+			if (EGL_TRUE != eglGetConfigAttrib(display, config[i], EGL_CONFIG_CAVEAT, &value)) {
+				fprintf(stderr, "eglGetConfigAttrib() failed\n");
+				continue;
+			}
+
+			if (EGL_NON_CONFORMANT_CONFIG == value) {
+				fprintf(stdout, "non-conformant caveat -- skip\n");
+				continue;
+			}
+
+			static const EGLint attr[] = {
+				EGL_BUFFER_SIZE,
+				EGL_ALPHA_SIZE,
+				EGL_BLUE_SIZE,
+				EGL_GREEN_SIZE,
+				EGL_RED_SIZE,
+				EGL_DEPTH_SIZE,
+				EGL_STENCIL_SIZE,
+				EGL_CONFIG_CAVEAT,
+				EGL_CONFIG_ID,
+				EGL_LEVEL,
+				EGL_MAX_PBUFFER_HEIGHT,
+				EGL_MAX_PBUFFER_PIXELS,
+				EGL_MAX_PBUFFER_WIDTH,
+				EGL_NATIVE_RENDERABLE,
+				EGL_NATIVE_VISUAL_ID,
+				EGL_NATIVE_VISUAL_TYPE,
+				EGL_SAMPLES,
+				EGL_SAMPLE_BUFFERS,
+				EGL_SURFACE_TYPE,
+				EGL_TRANSPARENT_TYPE,
+				EGL_TRANSPARENT_BLUE_VALUE,
+				EGL_TRANSPARENT_GREEN_VALUE,
+				EGL_TRANSPARENT_RED_VALUE,
+				EGL_BIND_TO_TEXTURE_RGB,
+				EGL_BIND_TO_TEXTURE_RGBA,
+				EGL_MIN_SWAP_INTERVAL,
+				EGL_MAX_SWAP_INTERVAL,
+				EGL_LUMINANCE_SIZE,
+				EGL_ALPHA_MASK_SIZE,
+				EGL_COLOR_BUFFER_TYPE,
+				EGL_RENDERABLE_TYPE,
+				EGL_CONFORMANT
+			};
+
+			for (unsigned j = 0; j < sizeof(attr) / sizeof(attr[0]); ++j) {
+				EGLint value;
+
+				if (EGL_TRUE != eglGetConfigAttrib(display, config[i], attr[j], &value)) {
+					fprintf(stderr, "eglGetConfigAttrib() failed (2)\n");
+					continue;
+				}
+
+				fprintf(stdout, "\t%s: 0x%08x\n", string_from_EGL_attrib(attr[j]), value);
+			}
+		}
+		if (numConfig)
+			fputc('\n', stdout);
+	}
 
 	const EGLint configAttribs[] = {
 		EGL_RED_SIZE, 8,
@@ -374,7 +532,7 @@ bool eglapp_init(int argc, char **argv)
 	surfParam.pixel_format = mir_connection_get_egl_pixel_format(
 		mir.connection, display, config[0]);
 
-	fprintf(stdout, "mir surface format: %s\n", str_from_pixel_format(surfParam.pixel_format));
+	fprintf(stdout, "mir surface format: %s\n", string_from_pixel_format(surfParam.pixel_format));
 
 	MirSurfaceSpec* spec = mir_connection_create_spec_for_normal_surface(
 		mir.connection,
@@ -429,8 +587,11 @@ bool eglapp_init(int argc, char **argv)
 
 	CHECK(surface != EGL_NO_SURFACE, "eglCreateWindowSurface failed");
 
+	ok = eglSurfaceAttrib(display, surface, EGL_SWAP_BEHAVIOR, EGL_BUFFER_DESTROYED);
+	CHECK(ok, "eglSurfaceAttrib failed");
+
 	ok = eglMakeCurrent(display, surface, surface, context);
-	CHECK(ok, "Can't eglMakeCurrent");
+	CHECK(ok, "eglMakeCurrent failed");
 
 	eglSwapInterval(display, swapinterval);
 

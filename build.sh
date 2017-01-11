@@ -17,6 +17,9 @@ CFLAGS=(
 	-I/usr/include/mircommon
 	-I/usr/include/mirclient
 	-I./include
+	-fno-rtti
+	-fno-exceptions
+	-fstrict-aliasing
 	-DANDROID
 )
 DEPEND=(

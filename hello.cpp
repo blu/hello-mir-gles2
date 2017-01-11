@@ -168,44 +168,17 @@ static GLuint make_buffer(
 	return buffer;
 }
 
-static GLchar *file_contents(const char *filename, GLint *length)
-{
-	FILE *f = fopen(filename, "r");
-
-	if (!f) {
-		fprintf(stderr, "Unable to open %s for reading\n", filename);
-		return NULL;
-	}
-
-	fseek(f, 0, SEEK_END);
-	const size_t fileLen = ftell(f);
-	fseek(f, 0, SEEK_SET);
-
-	GLchar *buffer = (GLchar*) malloc(fileLen);
-	const size_t readLen = fread(buffer, 1, fileLen, f);
-	fclose(f);
-
-	if (fileLen != readLen) {
-		free(buffer);
-		*length = 0;
-		fprintf(stderr, "Failed reading file %s\n", filename);
-		return NULL;
-	}
-
-	*length = GLint(readLen);
-	return buffer;
-}
-
 static GLuint make_shader(GLenum type, const char *filename)
 {
-	GLint length;
-	GLchar *source = file_contents(filename, &length);
+	size_t length;
+	GLchar *source = util::get_buffer_from_file(filename, length);
 
 	if (!source)
 		return 0;
 
+	const GLint len = GLint(length);
 	const GLuint shader = glCreateShader(type);
-	glShaderSource(shader, 1, &source, &length);
+	glShaderSource(shader, 1, &source, &len);
 	glCompileShader(shader);
 	free(source);
 
@@ -228,7 +201,6 @@ static GLuint make_shader(GLenum type, const char *filename)
 static GLuint make_program(GLuint vertex_shader, GLuint fragment_shader)
 {
 	GLint program_ok;
-
 	GLuint program = glCreateProgram();
 
 	glAttachShader(program, vertex_shader);
@@ -346,20 +318,20 @@ static void render(void)
 	glBindBuffer(GL_ARRAY_BUFFER, g_resources.vertex_buffer);
 	glVertexAttribPointer(
 		g_resources.attributes.position,  /* attribute */
-		2,								  /* size */
-		GL_FLOAT,						  /* type */
-		GL_FALSE,						  /* normalized? */
-		sizeof(GLfloat)*2,				  /* stride */
-		(void*)0						  /* array buffer offset */
+		2,                                /* size */
+		GL_FLOAT,                         /* type */
+		GL_FALSE,                         /* normalized? */
+		sizeof(GLfloat)*2,                /* stride */
+		(void*)0                          /* array buffer offset */
 	);
 	glEnableVertexAttribArray(g_resources.attributes.position);
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, g_resources.element_buffer);
 	glDrawElements(
-		GL_TRIANGLE_STRIP,	/* mode */
-		4,					/* count */
-		GL_UNSIGNED_SHORT,	/* type */
-		(void*)0			/* element array buffer offset */
+		GL_TRIANGLE_STRIP,  /* mode */
+		4,                  /* count */
+		GL_UNSIGNED_SHORT,  /* type */
+		(void*)0            /* element array buffer offset */
 	);
 
 	glDisableVertexAttribArray(g_resources.attributes.position);
