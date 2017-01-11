@@ -1,7 +1,5 @@
-// Based on code by Don Bright
-// see https://github.com/donbright/hello-mir-gles2
-// Based on code by Joe Groff
-// see https://github.com/jckarter/hello-gl
+// Based on code by Don Bright (https://github.com/donbright/hello-mir-gles2)
+// Based on code by Joe Groff (https://github.com/jckarter/hello-gl)
 // Based on code by Daniel van Vugt <daniel.van.vugt@canonical.com>
 // original license follows:
 
@@ -58,7 +56,7 @@ static const char* string_from_GL_error(
 		return "GL_OUT_OF_MEMORY";
 	}
 
-	return "unknown";
+	return "unknown-gl-error";
 }
 
 bool reportGLError(FILE* f)
