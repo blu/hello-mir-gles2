@@ -1,11 +1,11 @@
 #!/bin/bash
 
 CC=g++
-CLICK=click_resource
+RESOURCE=resource
 CLICK_PACKAGE=hello-gles_0.1_armhf.click
 APP_LOG=~/.cache/upstart/application-click-hello-gles_hello-gles_0.1.log
 
-TARGET=${CLICK}/hello-gles
+TARGET=${RESOURCE}/hello-gles
 SOURCE=(
 	eglapp.cpp
 	hello.cpp
@@ -70,7 +70,7 @@ fi
 BUILD_CMD=${SOURCE[@]}" "${CFLAGS[@]}" "${DEPEND[@]}
 echo $CC $BUILD_CMD
 
-"$CC" $BUILD_CMD && click build ${CLICK} && pkcon install-local --allow-untrusted ${CLICK_PACKAGE}
+"$CC" $BUILD_CMD && click build ${RESOURCE} && pkcon install-local --allow-untrusted ${CLICK_PACKAGE}
 
 if [ -f $TARGET ]; then
 	rm $TARGET

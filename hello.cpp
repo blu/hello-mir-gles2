@@ -136,12 +136,10 @@ static bool reportGLCaps(FILE* f)
  */
 static struct {
 	GLuint vertex_buffer, element_buffer;
-	GLuint textures[2];
 	GLuint vertex_shader, fragment_shader, program;
 	
 	struct {
 		GLint blend_factor;
-		GLint textures[2];
 	} uniforms;
 
 	struct {
@@ -230,8 +228,6 @@ static const GLushort g_element_buffer_data[] = { 0, 1, 2, 3 };
  */
 static int make_resources(void)
 {
-	fprintf(stderr,"make res stage 1\n");
-
 	g_resources.vertex_buffer = make_buffer(
 		GL_ARRAY_BUFFER,
 		g_vertex_buffer_data,
@@ -243,20 +239,11 @@ static int make_resources(void)
 		sizeof(g_element_buffer_data)
 	);
 
-	fprintf(stderr,"make res stage 2\n");
-
-	g_resources.textures[0] = 0;
-	g_resources.textures[1] = 0;
-
-	fprintf(stderr,"make res stage 3\n");
-
 	g_resources.vertex_shader = make_shader(
 		GL_VERTEX_SHADER, "hello-gl.v.glsl");
 
 	if (g_resources.vertex_shader == 0)
 		return 0;
-
-	fprintf(stderr,"make res stage 4\n");
 
 	g_resources.fragment_shader = make_shader(
 		GL_FRAGMENT_SHADER, "hello-gl.f.glsl");
@@ -264,23 +251,13 @@ static int make_resources(void)
 	if (g_resources.fragment_shader == 0)
 		return 0;
 
-	fprintf(stderr,"make res stage 5\n");
-
 	g_resources.program = make_program(g_resources.vertex_shader, g_resources.fragment_shader);
 
 	if (g_resources.program == 0)
 		return 0;
 
-	fprintf(stderr,"make res stage 6\n");
-
 	g_resources.uniforms.blend_factor
 		= glGetUniformLocation(g_resources.program, "blend_factor");
-	g_resources.uniforms.textures[0]
-		= glGetUniformLocation(g_resources.program, "textures[0]");
-	g_resources.uniforms.textures[1]
-		= glGetUniformLocation(g_resources.program, "textures[1]");
-
-	fprintf(stderr,"make res stage 7\n");
 
 	g_resources.attributes.position
 		= glGetAttribLocation(g_resources.program, "position");
@@ -302,17 +279,6 @@ static void render(void)
 
 	glUniform1f(g_resources.uniforms.blend_factor, g_resources.blend_factor);
 	
-#if 0
-	glActiveTexture(GL_TEXTURE0);
-
-	glBindTexture(GL_TEXTURE_2D, g_resources.textures[0]);
-	glUniform1i(g_resources.uniforms.textures[0], 0);
-
-	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, g_resources.textures[1]);
-	glUniform1i(g_resources.uniforms.textures[1], 1);
-
-#endif
 	glBindBuffer(GL_ARRAY_BUFFER, g_resources.vertex_buffer);
 	glVertexAttribPointer(
 		g_resources.attributes.position,  /* attribute */
