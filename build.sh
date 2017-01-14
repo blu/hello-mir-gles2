@@ -10,7 +10,6 @@ SOURCE=(
 	eglapp.cpp
 	hello.cpp
 	utilFile.cpp
-	utilTex.cpp
 )
 CFLAGS=(
 	-o ${TARGET}
@@ -27,6 +26,7 @@ CFLAGS=(
 )
 if [[ $1 == "guest" ]]; then
 	SOURCE+=(
+		utilTex.cpp
 		app_sphere.cpp
 	)
 	CFLAGS+=(
