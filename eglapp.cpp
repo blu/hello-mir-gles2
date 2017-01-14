@@ -374,9 +374,7 @@ static bool reportEGLCaps(
 	const char* str_exten	= eglQueryString(display, EGL_EXTENSIONS);
 
 	fprintf(f, "egl version, vendor, extensions:"
-		"\n\t%s"
-		"\n\t%s"
-		"\n\t%s\n",
+		"\n\t%s\n\t%s\n\t%s\n",
 		str_version, str_vendor, str_exten);
 
 	EGLConfig config[128];

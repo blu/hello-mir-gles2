@@ -80,11 +80,7 @@ static bool reportGLCaps(FILE* f)
 	const GLubyte* str_exten	= glGetString(GL_EXTENSIONS);
 
 	fprintf(f, "gl version, vendor, renderer, glsl version, extensions:"
-		"\n\t%s"
-		"\n\t%s"
-		"\n\t%s"
-		"\n\t%s"
-		"\n\t%s\n",
+		"\n\t%s\n\t%s\n\t%s\n\t%s\n\t%s\n",
 		(const char*) str_version,
 		(const char*) str_vendor,
 		(const char*) str_renderer,
