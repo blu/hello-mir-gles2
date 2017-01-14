@@ -53,9 +53,10 @@ bool get_file_size(
 char* get_buffer_from_file(
 	const char* const filename,
 	size_t& size,
-	const size_t roundToLog2)
+	const size_t roundToIntegralMultiple)
 {
 	assert(0 != filename);
+	assert(0 == (roundToIntegralMultiple & roundToIntegralMultiple - 1));
 
 	if (!get_file_size(filename, size)) {
 		fprintf(stderr, "%s cannot get size of file '%s'\n", __FUNCTION__, filename);
@@ -69,7 +70,7 @@ char* get_buffer_from_file(
 		return 0;
 	}
 
-	const size_t roundTo = (1 << roundToLog2) - 1;
+	const size_t roundTo = roundToIntegralMultiple - 1;
 	scoped_ptr< char, generic_free > source(
 		reinterpret_cast< char* >(malloc((size + roundTo) & ~roundTo)));
 
