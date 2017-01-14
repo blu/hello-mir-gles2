@@ -1,7 +1,7 @@
 [Desktop Entry]
 Name=hello-gles
 Comment=hello-gles
-Exec=hello-gles -f
+Exec=hello-gles -f -app tile 4 -app anim_step .0078125
 Icon=hello-gles.png
 Terminal=false
 Type=Application

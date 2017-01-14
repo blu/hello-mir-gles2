@@ -2,34 +2,20 @@
 #define testbed_H__
 
 #include <stdio.h>
-#if defined(PLATFORM_GL)
-#include <GL/gl.h>
-#else
 #include <GLES2/gl2.h>
-#endif
+
+GLuint make_buffer(
+	GLenum target,
+	const void *buffer_data,
+	GLsizei buffer_size);
+
+GLuint make_shader(GLenum type, const char *filename);
+GLuint make_program(GLuint vertex_shader, GLuint fragment_shader);
 
 namespace util {
 
-bool
-setupShader(
-	const GLuint shader_name,
-	const char* const filename);
-
-bool
-setupShaderWithPatch(
-	const GLuint shader_name,
-	const char* const filename,
-	const unsigned patch_count,
-	const char* const* patch);
-
-bool
-setupProgram(
-	const GLuint prog_name,
-	const GLuint shader_v_name,
-	const GLuint shader_f_name);
-
-bool reportGLError(FILE*);
-bool reportEGLError(FILE*);
+bool reportGLError(FILE* f = stderr);
+bool reportEGLError(FILE* f = stderr);
 
 } // namespace util
 

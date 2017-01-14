@@ -2,12 +2,7 @@
 #define util_tex_H__
 
 #include <stdint.h>
-
-#if defined(PLATFORM_GL)
-#include <GL/gl.h>
-#else
 #include <GLES2/gl2.h>
-#endif
 
 namespace util {
 
@@ -31,14 +26,14 @@ bool setupTexture2D(
 	const pix* const buffer,
 	const unsigned tex_w,
 	const unsigned tex_h,
-	const bool sampleNearest);
+	const bool sampleNearest = false);
 
 bool setupTexture2D(
 	const GLuint tex_name,
 	const char* const filename,
 	unsigned& tex_w,
 	unsigned& tex_h,
-	const bool sampleNearest);
+	const bool sampleNearest = false);
 
 } // namespace util
 

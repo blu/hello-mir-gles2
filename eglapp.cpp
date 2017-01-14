@@ -316,6 +316,9 @@ static bool parse_cli(
 			continue;
 		}
 
+		if (0 == strcmp(arg + 1, "app"))
+			break;
+
 		if (0 == strcmp(arg + 1, "n")) {
 			swapinterval = 0;
 			continue;
@@ -344,10 +347,10 @@ static bool parse_cli(
 	if (help) {
 		printf(
 			"Usage: %s [<options>]\n"
-			"  -h				Show this help text\n"
-			"  -f				Force full screen\n"
-			"  -n				Don't sync to vblank\n"
-			"  -s WIDTHxHEIGHT	Force surface size\n",
+			"  -h               Show this help text\n"
+			"  -f               Force full screen\n"
+			"  -n               Don't sync to vblank\n"
+			"  -s WIDTHxHEIGHT  Force surface size\n",
 			argv[0]);
 	}
 

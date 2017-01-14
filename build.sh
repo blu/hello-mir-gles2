@@ -17,11 +17,22 @@ CFLAGS=(
 	-I/usr/include/mircommon
 	-I/usr/include/mirclient
 	-I./include
+	-O3
 	-fno-rtti
 	-fno-exceptions
 	-fstrict-aliasing
+	-DNDEBUG
 	-DANDROID
+	-DPLATFORM_HAS_VAO
 )
+if [[ $1 == "guest" ]]; then
+	SOURCE+=(
+		app_sphere.cpp
+	)
+	CFLAGS+=(
+		-DGUEST_APP
+	)
+fi
 DEPEND=(
 	`ldconfig -p | grep -m 1 ^[[:space:]]libEGL.so | sed "s/^.\+ //"`
 	`ldconfig -p | grep -m 1 ^[[:space:]]libGLESv2.so | sed "s/^.\+ //"`

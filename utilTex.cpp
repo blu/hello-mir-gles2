@@ -51,6 +51,9 @@ static bool fill_from_file(
 	unsigned& tex_h,
 	const size_t fileSize)
 {
+	if (0 == buffer)
+		return false;
+
 	const uint32_t* header = reinterpret_cast< const uint32_t* >(buffer);
 
 	const uint32_t w = header[0];
@@ -139,22 +142,15 @@ bool setupTexture2D(
 	assert(0 != tex_w && 0 != tex_h);
 
 	const size_t pix_size = sizeof(pix);
+	const pix* start = 0;
 	size_t fileSize;
 
 	// provide some guardband as pixels are of non-word-multiple size
 	scoped_ptr< pix, generic_free > tex_src(
 		reinterpret_cast< pix* >(get_buffer_from_file(filename, fileSize, integral_size(sizeof(pix)))));
 
-	if (0 == tex_src()) {
-		fprintf(stderr, "%s failed to load texture file '%s'\n", __FUNCTION__, filename);
-		return false;
-	}
-
-	const pix* start = 0;
-
-	if (fill_from_file(tex_src(), tex_w, tex_h, fileSize)) {
+	if (0 != tex_src() && fill_from_file(tex_src(), tex_w, tex_h, fileSize)) {
 		fprintf(stdout, "texture bitmap '%s' ", filename);
-
 		const size_t header_size = sizeof(uint32_t[2]);
 
 		start = reinterpret_cast< pix*>(

@@ -37,7 +37,7 @@ bool get_file_size(
 	struct stat filestat;
 
 	if (-1 == stat(filename, &filestat)) {
-		fprintf(stderr, "%s failed to stat file '%s'\n", __FUNCTION__, filename);
+		fprintf(stderr, "%s cannot stat file '%s'\n", __FUNCTION__, filename);
 		return false;
 	}
 

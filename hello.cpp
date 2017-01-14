@@ -33,8 +33,9 @@
 
 #include "eglapp.h"
 #include "utilFile.hpp"
-#include "utilTex.hpp"
+#if GUEST_APP
 #include "utilMisc.hpp"
+#endif
 
 namespace util {
 
@@ -152,7 +153,7 @@ static struct {
 /*
  * Functions for creating OpenGL objects:
  */
-static GLuint make_buffer(
+GLuint make_buffer(
 	GLenum target,
 	const void *buffer_data,
 	GLsizei buffer_size)
@@ -164,7 +165,7 @@ static GLuint make_buffer(
 	return buffer;
 }
 
-static GLuint make_shader(GLenum type, const char *filename)
+GLuint make_shader(GLenum type, const char *filename)
 {
 	size_t length;
 	GLchar *source = util::get_buffer_from_file(filename, length);
@@ -194,7 +195,7 @@ static GLuint make_shader(GLenum type, const char *filename)
 	return shader;
 }
 
-static GLuint make_program(GLuint vertex_shader, GLuint fragment_shader)
+GLuint make_program(GLuint vertex_shader, GLuint fragment_shader)
 {
 	GLint program_ok;
 	GLuint program = glCreateProgram();
@@ -265,11 +266,25 @@ static int make_resources(void)
 	return 1;
 }
 
+static uint64_t time_ns()
+{
+#if defined(CLOCK_MONOTONIC_RAW)
+	const clockid_t clockid = CLOCK_MONOTONIC_RAW;
+
+#else
+	const clockid_t clockid = CLOCK_MONOTONIC;
+
+#endif
+	timespec t;
+	clock_gettime(clockid, &t);
+	return t.tv_sec * 1000000000ULL + t.tv_nsec;
+}
+
 static void update_blend_factor(void)
 {
 	struct timespec t;
 	clock_gettime(CLOCK_MONOTONIC, &t);
-	const float nsec = t.tv_nsec / 1e9;
+	const float nsec = t.tv_nsec * 1e-9;
 	g_resources.blend_factor = sinf(nsec * float(M_PI * 2.0)) * .5f + .5f;
 }
 
@@ -310,11 +325,19 @@ int main(int argc, char **argv)
 
 	fprintf(stderr, "make resources..\n");
 
+#if GUEST_APP
+	if (!hook::init_resources(argc, argv)) {
+		fprintf(stderr, "Failed to load resources\n");
+		return 1;
+	}
+
+#else
 	if (!make_resources()) {
 		fprintf(stderr, "Failed to load resources\n");
 		return 1;
 	}
 
+#endif
 	fprintf(stderr, "zooming..\n");
 
 	while (eglapp_zooming()) {
@@ -322,16 +345,34 @@ int main(int argc, char **argv)
 		eglapp_swap_buffers();
 	}
 
-	fprintf(stderr, "loop..\n");
-
 	glViewport(GLint(0), GLint(0), GLsizei(eglapp_target_width()), GLsizei(eglapp_target_height()));
 
+	size_t frameCount = 0;
+	const uint64_t t0 = time_ns();
+
 	while (eglapp_running()) {
+
+#if GUEST_APP
+		hook::render_frame();
+
+#else
 		update_blend_factor();
 		render();
+
+#endif
 		eglapp_swap_buffers();
+		frameCount++;
 	}
 
+	const double dt = (time_ns() - t0) * 1e-9;
+
+	fprintf(stdout, "elapsed %f s, frames %llu, fps %f\n",
+		dt, uint64_t(frameCount),  frameCount / dt);
+
+#if GUEST_APP
+	hook::deinit_resources();
+
+#endif
 	eglapp_shutdown();
 	return 0;
 }
