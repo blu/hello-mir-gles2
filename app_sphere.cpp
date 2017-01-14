@@ -24,9 +24,9 @@ using util::deinit_resources_t;
 
 namespace {
 
-#define SETUP_VERTEX_ATTR_POINTERS_MASK	(			\
-		SETUP_VERTEX_ATTR_POINTERS_MASK_vertex |	\
-		SETUP_VERTEX_ATTR_POINTERS_MASK_normal |	\
+#define SETUP_VERTEX_ATTR_POINTERS_MASK ( \
+		SETUP_VERTEX_ATTR_POINTERS_MASK_vertex | \
+		SETUP_VERTEX_ATTR_POINTERS_MASK_normal | \
 		SETUP_VERTEX_ATTR_POINTERS_MASK_tcoord)
 
 #include "rendVertAttr_setupVertAttrPointers.hpp"
@@ -527,9 +527,9 @@ bool init_resources(
 		return false;
 	}
 
-	g_uni[PROG_SPHERE][UNI_MVP]		= glGetUniformLocation(g_shader_prog[PROG_SPHERE], "mvp");
-	g_uni[PROG_SPHERE][UNI_LP_OBJ]	= glGetUniformLocation(g_shader_prog[PROG_SPHERE], "lp_obj");
-	g_uni[PROG_SPHERE][UNI_VP_OBJ]	= glGetUniformLocation(g_shader_prog[PROG_SPHERE], "vp_obj");
+	g_uni[PROG_SPHERE][UNI_MVP]    = glGetUniformLocation(g_shader_prog[PROG_SPHERE], "mvp");
+	g_uni[PROG_SPHERE][UNI_LP_OBJ] = glGetUniformLocation(g_shader_prog[PROG_SPHERE], "lp_obj");
+	g_uni[PROG_SPHERE][UNI_VP_OBJ] = glGetUniformLocation(g_shader_prog[PROG_SPHERE], "vp_obj");
 
 	g_uni[PROG_SPHERE][UNI_SAMPLER_NORMAL] = glGetUniformLocation(g_shader_prog[PROG_SPHERE], "normal_map");
 	g_uni[PROG_SPHERE][UNI_SAMPLER_ALBEDO] = glGetUniformLocation(g_shader_prog[PROG_SPHERE], "albedo_map");
