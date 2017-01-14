@@ -1,5 +1,5 @@
-#ifndef testbed_H__
-#define testbed_H__
+#ifndef util_misc_H__
+#define util_misc_H__
 
 #include <stdio.h>
 #include <GLES2/gl2.h>
@@ -31,4 +31,4 @@ bool render_frame();
 
 } // namespace hook
 
-#endif // testbed_H__
+#endif // util_misc_H__

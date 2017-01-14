@@ -3,9 +3,9 @@
 #include <assert.h>
 
 #include "scoped.hpp"
-#include "utilFile.hpp"
-#include "utilTex.hpp"
-#include "utilMisc.hpp"
+#include "util_file.hpp"
+#include "util_tex.hpp"
+#include "util_misc.hpp"
 
 namespace util {
 

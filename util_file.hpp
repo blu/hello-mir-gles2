@@ -1,5 +1,5 @@
-#ifndef utilFile_H__
-#define utilFile_H__
+#ifndef util_file_H__
+#define util_file_H__
 
 namespace util {
 
@@ -14,4 +14,4 @@ char* get_buffer_from_file(
 
 } // namespace util
 
-#endif // utilFile_H__
+#endif // util_file_H__

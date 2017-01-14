@@ -12,8 +12,8 @@
 #include <iostream>
 
 #include "scoped.hpp"
-#include "utilTex.hpp"
-#include "utilMisc.hpp"
+#include "util_tex.hpp"
+#include "util_misc.hpp"
 #include "pure_macro.hpp"
 
 #include "rendVertAttr.hpp"

@@ -32,9 +32,9 @@
 #include <GLES2/gl2ext.h>
 
 #include "eglapp.h"
-#include "utilFile.hpp"
+#include "util_file.hpp"
 #if GUEST_APP
-#include "utilMisc.hpp"
+#include "util_misc.hpp"
 #endif
 
 namespace util {
