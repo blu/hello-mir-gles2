@@ -246,7 +246,7 @@ static bool createIndexedPolarSphere(
 
 	// north pole
 	for (int j = 0; j < cols - 1; ++j) {
-		assert(ai < num_vers);
+		assert(ai < num_verts);
 
 		arr()[ai].pos[0] = 0.f;
 		arr()[ai].pos[1] = 0.f;
