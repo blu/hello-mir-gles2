@@ -1,6 +1,10 @@
-#include <EGL/egl.h>
-#include <GLES2/gl2.h>
-#include <GLES2/gl2ext.h>
+#if PLATFORM_GL
+	#include <GL/gl.h>
+#else
+	#include <EGL/egl.h>
+	#include <GLES2/gl2.h>
+	#include <GLES2/gl2ext.h>
+#endif
 
 #include <unistd.h>
 #include <stdio.h>
@@ -62,14 +66,28 @@ static TexDesc g_albedo = { "rockwall.raw", 256, 256 };
 static float g_tile = 2.f;
 static float g_angle_step = 3.f / 40.f;
 
+#if PLATFORM_GLX == 0
 static EGLDisplay g_display = EGL_NO_DISPLAY;
 static EGLContext g_context = EGL_NO_CONTEXT;
 
+#endif
+#if PLATFORM_GLES
 #if PLATFORM_HAS_VAO
 static PFNGLBINDVERTEXARRAYOESPROC    glBindVertexArrayOES;
 static PFNGLDELETEVERTEXARRAYSOESPROC glDeleteVertexArraysOES;
 static PFNGLGENVERTEXARRAYSOESPROC    glGenVertexArraysOES;
 static PFNGLISVERTEXARRAYOESPROC      glIsVertexArrayOES;
+
+#endif
+#else
+// desktop GL has had VAOs in GL Core since version 3.0
+#if !defined(PLATFORM_HAS_VAO)
+	#define PLATFORM_HAS_VAO 1
+#endif
+#define glBindVertexArrayOES    glBindVertexArray
+#define glDeleteVertexArraysOES glDeleteVertexArrays
+#define glGenVertexArraysOES    glGenVertexArrays
+#define glIsVertexArrayOES      glIsVertexArray
 
 #endif
 enum {
@@ -148,7 +166,7 @@ bool requires_depth()
 
 static bool parse_cli(
     const unsigned argc,
-    const char* const * argv)
+    const char* const* argv)
 {
 	bool cli_err = false;
 	const unsigned prefix_len = strlen(arg_prefix);
@@ -165,6 +183,7 @@ static bool parse_cli(
 					1 == sscanf(argv[i + 3], "%u", &g_normal.h)) {
 
 					g_normal.filename = argv[i + 1];
+					i += 3;
 					continue;
 				}
 			}
@@ -174,18 +193,21 @@ static bool parse_cli(
 					1 == sscanf(argv[i + 3], "%u", &g_albedo.h)) {
 
 					g_albedo.filename = argv[i + 1];
+					i += 3;
 					continue;
 				}
 			}
 			else
 			if (i + 1 < argc && !strcmp(argv[i], arg_tile)) {
 				if (1 == sscanf(argv[i + 1], "%f", &g_tile) && 0.f < g_tile) {
+					i += 1;
 					continue;
 				}
 			}
 			else
 			if (i + 1 < argc && !strcmp(argv[i], arg_anim_step)) {
 				if (1 == sscanf(argv[i + 1], "%f", &g_angle_step) && 0.f < g_angle_step) {
+					i += 1;
 					continue;
 				}
 			}
@@ -374,6 +396,7 @@ static bool check_context(
 {
 	bool context_correct = true;
 
+#if PLATFORM_GLX == 0
 	if (g_display != eglGetCurrentDisplay()) {
 		std::cerr << prefix << " encountered foreign display" << std::endl;
 		context_correct = false;
@@ -384,6 +407,7 @@ static bool check_context(
 		context_correct = false;
 	}
 
+#endif
 	return context_correct;
 }
 
@@ -421,12 +445,28 @@ bool deinit_resources()
 	glDeleteBuffers(sizeof(g_vbo) / sizeof(g_vbo[0]), g_vbo);
 	memset(g_vbo, 0, sizeof(g_vbo));
 
+#if PLATFORM_GLX == 0
 	g_display = EGL_NO_DISPLAY;
 	g_context = EGL_NO_CONTEXT;
 
+#endif
 	return true;
 }
 
+#if DEBUG
+static void debugProcARB(
+	GLenum source,
+	GLenum type,
+	GLuint id,
+	GLenum severity,
+	GLsizei length,
+	const GLchar* message,
+	const void* userParam)
+{
+	fprintf(stderr, "log: %s\n", message);
+}
+
+#endif
 bool init_resources(
 	const unsigned argc,
 	const char* const * argv)
@@ -434,7 +474,23 @@ bool init_resources(
 	if (!parse_cli(argc, argv))
 		return false;
 
-#if PLATFORM_HAS_VAO
+#if DEBUG
+	glDebugMessageCallbackARB(debugProcARB, NULL);
+	glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS_ARB);
+	glEnable(GL_DEBUG_OUTPUT);
+	DEBUG_GL_ERR()
+
+	glDebugMessageInsertARB(
+		GL_DEBUG_SOURCE_APPLICATION_ARB,
+		GL_DEBUG_TYPE_OTHER_ARB,
+		GLuint(42),
+		GL_DEBUG_SEVERITY_HIGH_ARB,
+		GLint(-1), 
+		"testing 1, 2, 3");
+	DEBUG_GL_ERR()
+
+#endif
+#if PLATFORM_GLES && PLATFORM_HAS_VAO
 	PFNGLBINDVERTEXARRAYOESPROC    glBindVertexArrayOES    = (PFNGLBINDVERTEXARRAYOESPROC)    eglGetProcAddress("glBindVertexArrayOES");
 	PFNGLDELETEVERTEXARRAYSOESPROC glDeleteVertexArraysOES = (PFNGLDELETEVERTEXARRAYSOESPROC) eglGetProcAddress("glDeleteVertexArraysOES");
 	PFNGLGENVERTEXARRAYSOESPROC    glGenVertexArraysOES    = (PFNGLGENVERTEXARRAYSOESPROC)    eglGetProcAddress("glGenVertexArraysOES");
@@ -446,6 +502,7 @@ bool init_resources(
 	}
 
 #endif
+#if PLATFORM_GLX == 0
 	g_display = eglGetCurrentDisplay();
 
 	if (EGL_NO_DISPLAY == g_display)
@@ -462,6 +519,7 @@ bool init_resources(
 		return false;
 	}
 
+#endif
 	scoped_ptr< deinit_resources_t, scoped_functor > on_error(deinit_resources);
 
 	/////////////////////////////////////////////////////////////////
@@ -507,26 +565,62 @@ bool init_resources(
 
 	/////////////////////////////////////////////////////////////////
 
-	if (0 == (g_shader_vert[PROG_SPHERE] = make_shader(GL_VERTEX_SHADER, "phong_bump_tang.glslv")))
+#if PLATFORM_GLES
+	g_shader_vert[PROG_SPHERE] = make_shader(GL_VERTEX_SHADER, "phong_bump_tang.glslv");
+
+	if (0 == g_shader_vert) {
+		std::cerr << __FUNCTION__ << " failed at setupShader" << std::endl;
+		return false;
+	}
+
+	g_shader_frag[PROG_SPHERE] = make_shader(GL_FRAGMENT_SHADER, "phong_bump_tang.glslf");
+
+	if (0 == g_shader_frag) {
+		std::cerr << __FUNCTION__ << " failed at setupShader" << std::endl;
+		return false;
+	}
+
+	g_shader_prog[PROG_SPHERE] = make_program(
+		g_shader_vert[PROG_SPHERE],
+		g_shader_frag[PROG_SPHERE]);
+
+	if (0 == g_shader_prog) {
+		std::cerr << __FUNCTION__ << " failed at setupProgram" << std::endl;
+		return false;
+	}
+
+#else
+	g_shader_vert[PROG_SPHERE] = glCreateShader(GL_VERTEX_SHADER);
+	assert(g_shader_vert[PROG_SPHERE]);
+
+	if (!util::setupShader(g_shader_vert[PROG_SPHERE], "phong_bump_tang.glslv"))
 	{
 		std::cerr << __FUNCTION__ << " failed at setupShader" << std::endl;
 		return false;
 	}
 
-	if (0 == (g_shader_frag[PROG_SPHERE] = make_shader(GL_FRAGMENT_SHADER, "phong_bump_tang.glslf")))
+	g_shader_frag[PROG_SPHERE] = glCreateShader(GL_FRAGMENT_SHADER);
+	assert(g_shader_frag[PROG_SPHERE]);
+
+	if (!util::setupShader(g_shader_frag[PROG_SPHERE], "phong_bump_tang.glslf"))
 	{
 		std::cerr << __FUNCTION__ << " failed at setupShader" << std::endl;
 		return false;
 	}
 
-	if (0 == (g_shader_prog[PROG_SPHERE] = make_program(
+	g_shader_prog[PROG_SPHERE] = glCreateProgram();
+	assert(g_shader_prog[PROG_SPHERE]);
+
+	if (!util::setupProgram(
+			g_shader_prog[PROG_SPHERE],
 			g_shader_vert[PROG_SPHERE],
-			g_shader_frag[PROG_SPHERE])))
+			g_shader_frag[PROG_SPHERE]))
 	{
 		std::cerr << __FUNCTION__ << " failed at setupProgram" << std::endl;
 		return false;
 	}
 
+#endif
 	g_uni[PROG_SPHERE][UNI_MVP]    = glGetUniformLocation(g_shader_prog[PROG_SPHERE], "mvp");
 	g_uni[PROG_SPHERE][UNI_LP_OBJ] = glGetUniformLocation(g_shader_prog[PROG_SPHERE], "lp_obj");
 	g_uni[PROG_SPHERE][UNI_VP_OBJ] = glGetUniformLocation(g_shader_prog[PROG_SPHERE], "vp_obj");
@@ -571,8 +665,7 @@ bool init_resources(
 	glBindBuffer(GL_ARRAY_BUFFER, g_vbo[VBO_SPHERE_VTX]);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, g_vbo[VBO_SPHERE_IDX]);
 
-	if (!setupVertexAttrPointers< Vertex >(g_active_attr_semantics[PROG_SPHERE]) ||
-		DEBUG_LITERAL && util::reportGLError())
+	if (!setupVertexAttrPointers< Vertex >(g_active_attr_semantics[PROG_SPHERE]))
 	{
 		std::cerr << __FUNCTION__ <<
 			" failed at setupVertexAttrPointers" << std::endl;

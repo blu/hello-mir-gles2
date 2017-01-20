@@ -22,6 +22,7 @@ CFLAGS=(
 	-fstrict-aliasing
 	-DNDEBUG
 	-DANDROID
+	-DPLATFORM_GLES
 	-DPLATFORM_HAS_VAO
 )
 if [[ $1 == "guest" ]]; then
