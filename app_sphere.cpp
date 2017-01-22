@@ -491,11 +491,12 @@ bool init_resources(
 	DEBUG_GL_ERR()
 
 #endif
-#if PLATFORM_GLES && PLATFORM_HAS_VAO
-	PFNGLBINDVERTEXARRAYOESPROC    glBindVertexArrayOES    = (PFNGLBINDVERTEXARRAYOESPROC)    eglGetProcAddress("glBindVertexArrayOES");
-	PFNGLDELETEVERTEXARRAYSOESPROC glDeleteVertexArraysOES = (PFNGLDELETEVERTEXARRAYSOESPROC) eglGetProcAddress("glDeleteVertexArraysOES");
-	PFNGLGENVERTEXARRAYSOESPROC    glGenVertexArraysOES    = (PFNGLGENVERTEXARRAYSOESPROC)    eglGetProcAddress("glGenVertexArraysOES");
-	PFNGLISVERTEXARRAYOESPROC      glIsVertexArrayOES      = (PFNGLISVERTEXARRAYOESPROC)      eglGetProcAddress("glIsVertexArrayOES");
+#if PLATFORM_GLES
+#if PLATFORM_HAS_VAO
+	glBindVertexArrayOES    = (PFNGLBINDVERTEXARRAYOESPROC)    eglGetProcAddress("glBindVertexArrayOES");
+	glDeleteVertexArraysOES = (PFNGLDELETEVERTEXARRAYSOESPROC) eglGetProcAddress("glDeleteVertexArraysOES");
+	glGenVertexArraysOES    = (PFNGLGENVERTEXARRAYSOESPROC)    eglGetProcAddress("glGenVertexArraysOES");
+	glIsVertexArrayOES      = (PFNGLISVERTEXARRAYOESPROC)      eglGetProcAddress("glIsVertexArrayOES");
 
 	if (0 == glBindVertexArrayOES) {
 		std::cerr << __FUNCTION__ << " failed to load GL_OES_vertex_array_object" << std::endl;
@@ -503,19 +504,18 @@ bool init_resources(
 	}
 
 #endif
+#endif
 #if PLATFORM_GLX == 0
 	g_display = eglGetCurrentDisplay();
 
-	if (EGL_NO_DISPLAY == g_display)
-	{
+	if (EGL_NO_DISPLAY == g_display) {
 		std::cerr << __FUNCTION__ << " encountered nil display" << std::endl;
 		return false;
 	}
 
 	g_context = eglGetCurrentContext();
 
-	if (EGL_NO_CONTEXT == g_context)
-	{
+	if (EGL_NO_CONTEXT == g_context) {
 		std::cerr << __FUNCTION__ << " encountered nil context" << std::endl;
 		return false;
 	}
