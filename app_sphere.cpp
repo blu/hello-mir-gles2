@@ -64,6 +64,7 @@ static TexDesc g_normal = { "rockwall_NH.raw", 64, 64 };
 static TexDesc g_albedo = { "rockwall.raw", 256, 256 };
 
 static float g_tile = 2.f;
+static float g_angle = 0.f;
 static float g_angle_step = 3.f / 40.f;
 
 #if PLATFORM_GLX == 0
@@ -81,7 +82,7 @@ static PFNGLISVERTEXARRAYOESPROC      glIsVertexArrayOES;
 #endif
 #else
 // desktop GL has had VAOs in GL Core since version 3.0
-#if !defined(PLATFORM_HAS_VAO)
+#if PLATFORM_HAS_VAO == 0
 	#define PLATFORM_HAS_VAO 1
 #endif
 #define glBindVertexArrayOES    glBindVertexArray
@@ -754,11 +755,9 @@ bool render_frame()
 
 	/////////////////////////////////////////////////////////////////
 
-	static GLfloat angle = 0.f;
-
-	const matx3 r0 = matx3_rotate(angle - M_PI_2, 1.f, 0.f, 0.f);
-	const matx3 r1 = matx3_rotate(angle,          0.f, 1.f, 0.f);
-	const matx3 r2 = matx3_rotate(angle,          0.f, 0.f, 1.f);
+	const matx3 r0 = matx3_rotate(g_angle - M_PI_2, 1.f, 0.f, 0.f);
+	const matx3 r1 = matx3_rotate(g_angle,          0.f, 1.f, 0.f);
+	const matx3 r2 = matx3_rotate(g_angle,          0.f, 0.f, 1.f);
 
 	const matx3 p0 = matx3_mul(r0, r1);
 	const matx3 p1 = matx3_mul(p0, r2);
@@ -776,7 +775,7 @@ bool render_frame()
 		{  0.f,                0.f,       0.f,       1.f }
 	};
 
-	angle = fmodf(angle + g_angle_step, 2.f * M_PI);
+	g_angle = fmodf(g_angle + g_angle_step, 2.f * M_PI);
 
 	/////////////////////////////////////////////////////////////////
 
