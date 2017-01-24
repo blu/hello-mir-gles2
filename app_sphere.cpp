@@ -1,5 +1,6 @@
 #if PLATFORM_GL
 	#include <GL/gl.h>
+	#include "gles_gl_mapping.hpp"
 #else
 	#include <EGL/egl.h>
 	#include <GLES2/gl2.h>
@@ -73,23 +74,27 @@ static EGLContext g_context = EGL_NO_CONTEXT;
 
 #endif
 #if PLATFORM_GLES
-#if PLATFORM_HAS_VAO
+#if PLATFORM_GL_OES_vertex_array_object
 static PFNGLBINDVERTEXARRAYOESPROC    glBindVertexArrayOES;
 static PFNGLDELETEVERTEXARRAYSOESPROC glDeleteVertexArraysOES;
 static PFNGLGENVERTEXARRAYSOESPROC    glGenVertexArraysOES;
 static PFNGLISVERTEXARRAYOESPROC      glIsVertexArrayOES;
 
 #endif
-#else
-// desktop GL has had VAOs in GL Core since version 3.0
-#if PLATFORM_HAS_VAO == 0
-	#define PLATFORM_HAS_VAO 1
-#endif
-#define glBindVertexArrayOES    glBindVertexArray
-#define glDeleteVertexArraysOES glDeleteVertexArrays
-#define glGenVertexArraysOES    glGenVertexArrays
-#define glIsVertexArrayOES      glIsVertexArray
+#if PLATFORM_GL_KHR_debug
+static PFNGLDEBUGMESSAGECONTROLKHRPROC  glDebugMessageControlKHR;
+static PFNGLDEBUGMESSAGEINSERTKHRPROC   glDebugMessageInsertKHR;
+static PFNGLDEBUGMESSAGECALLBACKKHRPROC glDebugMessageCallbackKHR;
+static PFNGLGETDEBUGMESSAGELOGKHRPROC   glGetDebugMessageLogKHR;
+static PFNGLPUSHDEBUGGROUPKHRPROC       glPushDebugGroupKHR;
+static PFNGLPOPDEBUGGROUPKHRPROC        glPopDebugGroupKHR;
+static PFNGLOBJECTLABELKHRPROC          glObjectLabelKHR;
+static PFNGLGETOBJECTLABELKHRPROC       glGetObjectLabelKHR;
+static PFNGLOBJECTPTRLABELKHRPROC       glObjectPtrLabelKHR;
+static PFNGLGETOBJECTPTRLABELKHRPROC    glGetObjectPtrLabelKHR;
+static PFNGLGETPOINTERVKHRPROC          glGetPointervKHR;
 
+#endif
 #endif
 enum {
 	TEX_NORMAL,
@@ -135,7 +140,7 @@ enum {
 
 static GLint g_uni[PROG_COUNT][UNI_COUNT];
 
-#if PLATFORM_HAS_VAO
+#if PLATFORM_GL_OES_vertex_array_object
 static GLuint g_vao[PROG_COUNT];
 
 #endif
@@ -438,7 +443,7 @@ bool deinit_resources()
 	glDeleteTextures(sizeof(g_tex) / sizeof(g_tex[0]), g_tex);
 	memset(g_tex, 0, sizeof(g_tex));
 
-#if PLATFORM_HAS_VAO
+#if PLATFORM_GL_OES_vertex_array_object
 	glDeleteVertexArraysOES(sizeof(g_vao) / sizeof(g_vao[0]), g_vao);
 	memset(g_vao, 0, sizeof(g_vao));
 
@@ -454,8 +459,8 @@ bool deinit_resources()
 	return true;
 }
 
-#if DEBUG
-static void debugProcARB(
+#if DEBUG && PLATFORM_GL_KHR_debug
+static void debugProc(
 	GLenum source,
 	GLenum type,
 	GLuint id,
@@ -475,35 +480,44 @@ bool init_resources(
 	if (!parse_cli(argc, argv))
 		return false;
 
-#if DEBUG
-	glDebugMessageCallbackARB(debugProcARB, NULL);
-	glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS_ARB);
-	glEnable(GL_DEBUG_OUTPUT);
-	DEBUG_GL_ERR()
-
-	glDebugMessageInsertARB(
-		GL_DEBUG_SOURCE_APPLICATION_ARB,
-		GL_DEBUG_TYPE_OTHER_ARB,
-		GLuint(42),
-		GL_DEBUG_SEVERITY_HIGH_ARB,
-		GLint(-1), 
-		"testing 1, 2, 3");
-	DEBUG_GL_ERR()
-
-#endif
 #if PLATFORM_GLES
-#if PLATFORM_HAS_VAO
+#if PLATFORM_GL_OES_vertex_array_object
 	glBindVertexArrayOES    = (PFNGLBINDVERTEXARRAYOESPROC)    eglGetProcAddress("glBindVertexArrayOES");
 	glDeleteVertexArraysOES = (PFNGLDELETEVERTEXARRAYSOESPROC) eglGetProcAddress("glDeleteVertexArraysOES");
 	glGenVertexArraysOES    = (PFNGLGENVERTEXARRAYSOESPROC)    eglGetProcAddress("glGenVertexArraysOES");
 	glIsVertexArrayOES      = (PFNGLISVERTEXARRAYOESPROC)      eglGetProcAddress("glIsVertexArrayOES");
 
-	if (0 == glBindVertexArrayOES) {
-		std::cerr << __FUNCTION__ << " failed to load GL_OES_vertex_array_object" << std::endl;
-		return false;
-	}
+#endif
+#if PLATFORM_GL_KHR_debug
+	glDebugMessageControlKHR  = (PFNGLDEBUGMESSAGECONTROLKHRPROC)  eglGetProcAddress("glDebugMessageControlKHR");
+	glDebugMessageInsertKHR   = (PFNGLDEBUGMESSAGEINSERTKHRPROC)   eglGetProcAddress("glDebugMessageInsertKHR");
+	glDebugMessageCallbackKHR = (PFNGLDEBUGMESSAGECALLBACKKHRPROC) eglGetProcAddress("glDebugMessageCallbackKHR");
+	glGetDebugMessageLogKHR   = (PFNGLGETDEBUGMESSAGELOGKHRPROC)   eglGetProcAddress("glGetDebugMessageLogKHR");
+	glPushDebugGroupKHR       = (PFNGLPUSHDEBUGGROUPKHRPROC)       eglGetProcAddress("glPushDebugGroupKHR");
+	glPopDebugGroupKHR        = (PFNGLPOPDEBUGGROUPKHRPROC)        eglGetProcAddress("glPopDebugGroupKHR");
+	glObjectLabelKHR          = (PFNGLOBJECTLABELKHRPROC)          eglGetProcAddress("glObjectLabelKHR");
+	glGetObjectLabelKHR       = (PFNGLGETOBJECTLABELKHRPROC)       eglGetProcAddress("glGetObjectLabelKHR");
+	glObjectPtrLabelKHR       = (PFNGLOBJECTPTRLABELKHRPROC)       eglGetProcAddress("glObjectPtrLabelKHR");
+	glGetObjectPtrLabelKHR    = (PFNGLGETOBJECTPTRLABELKHRPROC)    eglGetProcAddress("glGetObjectPtrLabelKHR");
+	glGetPointervKHR          = (PFNGLGETPOINTERVKHRPROC)          eglGetProcAddress("glGetPointervKHR");
 
 #endif
+#endif
+#if DEBUG && PLATFORM_GL_KHR_debug
+	glDebugMessageCallbackKHR(debugProc, NULL);
+	glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS_KHR);
+	glEnable(GL_DEBUG_OUTPUT_KHR);
+	DEBUG_GL_ERR()
+
+	glDebugMessageInsertKHR(
+		GL_DEBUG_SOURCE_APPLICATION_KHR,
+		GL_DEBUG_TYPE_OTHER_KHR,
+		GLuint(42),
+		GL_DEBUG_SEVERITY_HIGH_KHR,
+		GLint(-1), 
+		"testing 1, 2, 3");
+	DEBUG_GL_ERR()
+
 #endif
 #if PLATFORM_GLX == 0
 	g_display = eglGetCurrentDisplay();
@@ -594,8 +608,7 @@ bool init_resources(
 	g_shader_vert[PROG_SPHERE] = glCreateShader(GL_VERTEX_SHADER);
 	assert(g_shader_vert[PROG_SPHERE]);
 
-	if (!util::setupShader(g_shader_vert[PROG_SPHERE], "phong_bump_tang.glslv"))
-	{
+	if (!util::setupShader(g_shader_vert[PROG_SPHERE], "phong_bump_tang.glslv")) {
 		std::cerr << __FUNCTION__ << " failed at setupShader" << std::endl;
 		return false;
 	}
@@ -603,8 +616,7 @@ bool init_resources(
 	g_shader_frag[PROG_SPHERE] = glCreateShader(GL_FRAGMENT_SHADER);
 	assert(g_shader_frag[PROG_SPHERE]);
 
-	if (!util::setupShader(g_shader_frag[PROG_SPHERE], "phong_bump_tang.glslf"))
-	{
+	if (!util::setupShader(g_shader_frag[PROG_SPHERE], "phong_bump_tang.glslf")) {
 		std::cerr << __FUNCTION__ << " failed at setupShader" << std::endl;
 		return false;
 	}
@@ -638,7 +650,7 @@ bool init_resources(
 
 	/////////////////////////////////////////////////////////////////
 
-#if PLATFORM_HAS_VAO
+#if PLATFORM_GL_OES_vertex_array_object
 	glGenVertexArraysOES(sizeof(g_vao) / sizeof(g_vao[0]), g_vao);
 
 	for (unsigned i = 0; i < sizeof(g_vao) / sizeof(g_vao[0]); ++i)
@@ -659,15 +671,14 @@ bool init_resources(
 		return false;
 	}
 
-#if PLATFORM_HAS_VAO
+#if PLATFORM_GL_OES_vertex_array_object
 	glBindVertexArrayOES(g_vao[PROG_SPHERE]);
 
 #endif
 	glBindBuffer(GL_ARRAY_BUFFER, g_vbo[VBO_SPHERE_VTX]);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, g_vbo[VBO_SPHERE_IDX]);
 
-	if (!setupVertexAttrPointers< Vertex >(g_active_attr_semantics[PROG_SPHERE]))
-	{
+	if (!setupVertexAttrPointers< Vertex >(g_active_attr_semantics[PROG_SPHERE])) {
 		std::cerr << __FUNCTION__ <<
 			" failed at setupVertexAttrPointers" << std::endl;
 		return false;
@@ -677,10 +688,16 @@ bool init_resources(
 	return true;
 }
 
+class matx3;
+static matx3 matx3_mul(const matx3&, const matx3&);
+
 class matx3 {
+	friend matx3 matx3_mul(const matx3&, const matx3&);
 	float m[3][3];
 
 public:
+	matx3() {}
+
 	matx3(
 		const float c0_0, const float c0_1, const float c0_2,
 		const float c1_0, const float c1_1, const float c1_2,
@@ -697,38 +714,44 @@ public:
 		m[2][2] = c2_2;
 	}
 
-	matx3(const float (& arr)[3][3])
-	{
-		m[0][0] = arr[0][0];
-		m[0][1] = arr[0][1];
-		m[0][2] = arr[0][2];
-		m[1][0] = arr[1][0];
-		m[1][1] = arr[1][1];
-		m[1][2] = arr[1][2];
-		m[2][0] = arr[2][0];
-		m[2][1] = arr[2][1];
-		m[2][2] = arr[2][2];
-	}
-
 	const float (& operator[](const size_t i) const)[3] { return m[i]; }
+
+	template < size_t NUM_VECT, size_t NUM_ELEM >
+	void transform(
+		const float (& a)[NUM_VECT][NUM_ELEM],
+		float (& out)[NUM_VECT][NUM_ELEM]) const {
+
+		const size_t num_vect = NUM_VECT;
+		const size_t num_elem = 3;
+		const util::compile_assert< num_elem <= NUM_ELEM > assert_num_elem;
+
+		for (size_t j = 0; j < num_vect; ++j) {
+			float out_j[num_elem];
+			const float a_j0 = a[j][0];
+			for (size_t i = 0; i < num_elem; ++i) {
+				out_j[i] = a_j0 * m[0][i];
+			}
+			for (size_t k = 1; k < num_elem; ++k) {
+				const float a_jk = a[j][k];
+				for (size_t i = 0; i < num_elem; ++i) {
+					out_j[i] += a_jk * m[k][i];
+				}
+			}
+			for (size_t i = 0; i < num_elem; ++i)
+				out[j][i] = out_j[i];
+			for (size_t i = num_elem; i < NUM_ELEM; ++i)
+				out[j][i] = a[j][i];
+		}
+	}
 };
 
 static matx3 matx3_mul(
 	const matx3& ma,
 	const matx3& mb)
 {
-	float mc[3][3] = { { 0 } };
-	const size_t msize = sizeof(mc) / sizeof(mc[0]);
-
-	for (size_t i = 0; i < msize; ++i) {
-		for (size_t j = 0; j < msize; ++j) {
-			const float ma_ji = ma[j][i];
-			for (size_t k = 0; k < msize; ++k)
-				mc[j][k] += ma_ji * mb[i][k];
-		}
-	}
-
-	return matx3(mc);
+	matx3 mc;
+	mb.transform(ma.m, mc.m);
+	return mc;
 }
 
 static matx3 matx3_rotate(
@@ -846,7 +869,7 @@ bool render_frame()
 
 	DEBUG_GL_ERR()
 
-	glDrawElements(GL_TRIANGLES, g_num_faces[MESH_SPHERE] * 3, GL_UNSIGNED_SHORT, 0);
+	glDrawElements(GL_TRIANGLES, g_num_faces[MESH_SPHERE] * 3, GL_UNSIGNED_SHORT, (void*) 0);
 
 	DEBUG_GL_ERR()
 

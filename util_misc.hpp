@@ -2,7 +2,13 @@
 #define util_misc_H__
 
 #include <stdio.h>
-#include <GLES2/gl2.h>
+#if PLATFORM_GL
+	#include <GL/gl.h>
+#else
+	#include <GLES2/gl2.h>
+#endif
+
+#include <string>
 
 GLuint make_buffer(
 	GLenum target,
@@ -14,8 +20,32 @@ GLuint make_program(GLuint vertex_shader, GLuint fragment_shader);
 
 namespace util {
 
-bool reportGLError(FILE* f = stderr);
-bool reportEGLError(FILE* f = stderr);
+template < bool >
+struct compile_assert;
+
+template <>
+struct compile_assert< true > {
+	compile_assert() {
+	}
+};
+
+bool setupShader(
+	const GLuint shader_name,
+	const char* const filename);
+
+bool setupShaderWithPatch(
+	const GLuint shader_name,
+	const char* const filename,
+	const size_t patch_count,
+	const std::string* const patch);
+
+bool setupProgram(
+	const GLuint prog,
+	const GLuint shader_vert,
+	const GLuint shader_frag);
+
+bool reportGLError(FILE* file = stderr);
+bool reportEGLError(FILE* file = stderr);
 
 } // namespace util
 
@@ -28,6 +58,8 @@ bool init_resources(
 bool deinit_resources();
 bool requires_depth();
 bool render_frame();
+bool set_num_drawcalls(const unsigned);
+unsigned get_num_drawcalls();
 
 } // namespace hook
 

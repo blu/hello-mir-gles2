@@ -23,7 +23,7 @@ CFLAGS=(
 	-DNDEBUG
 	-DANDROID
 	-DPLATFORM_GLES
-	-DPLATFORM_HAS_VAO
+	-DPLATFORM_GL_OES_vertex_array_object
 )
 if [[ $1 == "guest" ]]; then
 	SOURCE+=(
