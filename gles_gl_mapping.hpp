@@ -1,8 +1,8 @@
 #ifndef gles_gl_mapping_H__
 #define gles_gl_mapping_H__
 
-#if !defined(PLATFORM_GLX)
-#error Wrong side of the road.
+#if PLATFORM_GL == 0
+#error platform is not desktop GL
 #endif
 
 #if !defined(GL_DEPTH_STENCIL_OES)
