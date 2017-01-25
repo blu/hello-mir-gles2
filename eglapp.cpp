@@ -316,7 +316,7 @@ static bool parse_cli(
 			continue;
 		}
 
-		if (0 == strcmp(arg + 1, "app"))
+		if (arg[1] == '-' && arg[2] == '\0')
 			break;
 
 		if (0 == strcmp(arg + 1, "n")) {
@@ -350,7 +350,8 @@ static bool parse_cli(
 			"  -h               Show this help text\n"
 			"  -f               Force full screen\n"
 			"  -n               Don't sync to vblank\n"
-			"  -s WIDTHxHEIGHT  Force surface size\n",
+			"  -s WIDTHxHEIGHT  Force surface size\n"
+			"  --               Mark start of foreign CLI\n",
 			argv[0]);
 	}
 

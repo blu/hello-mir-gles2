@@ -580,7 +580,7 @@ bool init_resources(
 
 	/////////////////////////////////////////////////////////////////
 
-#if PLATFORM_GLES
+#if GUEST_APP
 	g_shader_vert[PROG_SPHERE] = make_shader(GL_VERTEX_SHADER, "phong_bump_tang.glslv");
 
 	if (0 == g_shader_vert) {
