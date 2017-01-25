@@ -229,9 +229,9 @@ static bool parse_cli(
 			"\t" << arg_prefix << arg_app << " " << arg_albedo <<
 			" <filename> <width> <height>\t: use specified raw file and dimensions as source of albedo map\n"
 			"\t" << arg_prefix << arg_app << " " << arg_tile <<
-			" <n>\t\t\t\t\t\t\t\t: tile texture maps the specified number of times along U, half as much along V\n"
+			" <n>\t\t\t\t\t: tile texture maps the specified number of times along U, half as much along V\n"
 			"\t" << arg_prefix << arg_app << " " << arg_anim_step <<
-			" <step>\t\t\t\t\t\t: use specified rotation step\n" << std::endl;
+			" <step>\t\t\t\t: use specified rotation step\n" << std::endl;
 	}
 
 	return !cli_err;
