@@ -334,19 +334,11 @@ int main(int argc, char **argv)
 	}
 
 #endif
-	fprintf(stderr, "zooming..\n");
-
-	while (eglapp_zooming()) {
-		usleep(16000);
-		eglapp_swap_buffers();
-	}
-
-	glViewport(GLint(0), GLint(0), GLsizei(eglapp_target_width()), GLsizei(eglapp_target_height()));
-
 	size_t frameCount = 0;
 	const uint64_t t0 = time_ns();
 
 	while (eglapp_running()) {
+		glViewport(GLint(0), GLint(0), GLsizei(eglapp_target_width()), GLsizei(eglapp_target_height()));
 
 #if GUEST_APP
 		hook::render_frame();

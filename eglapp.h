@@ -25,7 +25,6 @@
 bool eglapp_init(int argc, char **argv);
 void eglapp_swap_buffers(void);
 bool eglapp_running(void);
-bool eglapp_zooming(void);
 void eglapp_shutdown(void);
 int eglapp_target_width(void);
 int eglapp_target_height(void);

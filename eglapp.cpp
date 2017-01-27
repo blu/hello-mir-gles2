@@ -37,8 +37,8 @@ static struct {
 	MirConnection* connection;
 	MirBufferStream* bufferStream;
 	MirSurface* surface;
-	int target_width;
-	int target_height;
+	volatile sig_atomic_t target_width;
+	volatile sig_atomic_t target_height;
 } mir;
 
 static struct {
@@ -52,7 +52,6 @@ static struct {
 };
 
 static volatile sig_atomic_t running;
-static volatile sig_atomic_t zooming;
 
 int eglapp_target_width()
 {
@@ -109,11 +108,6 @@ bool eglapp_running(void)
 	return running;
 }
 
-bool eglapp_zooming(void)
-{
-	return zooming;
-}
-
 void eglapp_swap_buffers(void)
 {
 	if (!running)
@@ -129,17 +123,8 @@ static void eglapp_handle_input(MirSurface* /*surface*/, MirEvent const* ev, voi
 		const int width = mir_resize_event_get_width(rev);
 		const int height = mir_resize_event_get_height(rev);
 
-		fprintf(stderr, "resize: %dx%d\n", width, height);
-
-		if ((width == mir.target_width && height == mir.target_height) ||
-			(width == mir.target_height && height == mir.target_width)) {
-
-			mir.target_width = width;
-			mir.target_height = height;
-			zooming = 0;
-
-			fprintf(stderr, "resize done\n");
-		}
+		mir.target_width = width;
+		mir.target_height = height;
 		return;
 	}
 
@@ -618,7 +603,6 @@ bool eglapp_init(int argc, char **argv)
 	mir.target_height = surfParam.height;
 
 	running = 1;
-	zooming = 1;
 
 	return true;
 }
