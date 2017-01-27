@@ -580,35 +580,22 @@ bool init_resources(
 
 	/////////////////////////////////////////////////////////////////
 
-#if GUEST_APP
-	g_shader_vert[PROG_SPHERE] = make_shader(GL_VERTEX_SHADER, "phong_bump_tang.glslv");
-
-	if (0 == g_shader_vert) {
-		std::cerr << __FUNCTION__ << " failed at setupShader" << std::endl;
-		return false;
-	}
-
-	g_shader_frag[PROG_SPHERE] = make_shader(GL_FRAGMENT_SHADER, "phong_bump_tang.glslf");
-
-	if (0 == g_shader_frag) {
-		std::cerr << __FUNCTION__ << " failed at setupShader" << std::endl;
-		return false;
-	}
-
-	g_shader_prog[PROG_SPHERE] = make_program(
-		g_shader_vert[PROG_SPHERE],
-		g_shader_frag[PROG_SPHERE]);
-
-	if (0 == g_shader_prog) {
-		std::cerr << __FUNCTION__ << " failed at setupProgram" << std::endl;
-		return false;
-	}
-
+	const std::string patch[] = {
+#if PLATFORM_GLES
+		std::string("///essl "),
+#elif PLATFORM_GL
+		std::string("///glsl "),
 #else
+#error unknown platform
+#endif
+		std::string("")
+	};
+
 	g_shader_vert[PROG_SPHERE] = glCreateShader(GL_VERTEX_SHADER);
 	assert(g_shader_vert[PROG_SPHERE]);
 
-	if (!util::setupShader(g_shader_vert[PROG_SPHERE], "phong_bump_tang.glslv")) {
+	if (!util::setupShaderWithPatch(g_shader_vert[PROG_SPHERE], "phong_bump_tang.glslv",
+			sizeof(patch) / sizeof(patch[0]) / 2, patch)) {
 		std::cerr << __FUNCTION__ << " failed at setupShader" << std::endl;
 		return false;
 	}
@@ -616,7 +603,8 @@ bool init_resources(
 	g_shader_frag[PROG_SPHERE] = glCreateShader(GL_FRAGMENT_SHADER);
 	assert(g_shader_frag[PROG_SPHERE]);
 
-	if (!util::setupShader(g_shader_frag[PROG_SPHERE], "phong_bump_tang.glslf")) {
+	if (!util::setupShaderWithPatch(g_shader_frag[PROG_SPHERE], "phong_bump_tang.glslf",
+			sizeof(patch) / sizeof(patch[0]) / 2, patch)) {
 		std::cerr << __FUNCTION__ << " failed at setupShader" << std::endl;
 		return false;
 	}
@@ -633,7 +621,6 @@ bool init_resources(
 		return false;
 	}
 
-#endif
 	g_uni[PROG_SPHERE][UNI_MVP]    = glGetUniformLocation(g_shader_prog[PROG_SPHERE], "mvp");
 	g_uni[PROG_SPHERE][UNI_LP_OBJ] = glGetUniformLocation(g_shader_prog[PROG_SPHERE], "lp_obj");
 	g_uni[PROG_SPHERE][UNI_VP_OBJ] = glGetUniformLocation(g_shader_prog[PROG_SPHERE], "vp_obj");

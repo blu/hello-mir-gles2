@@ -28,6 +28,7 @@ CFLAGS=(
 if [[ $1 == "guest" ]]; then
 	SOURCE+=(
 		util_tex.cpp
+		util_misc.cpp
 		app_sphere.cpp
 	)
 	CFLAGS+=(

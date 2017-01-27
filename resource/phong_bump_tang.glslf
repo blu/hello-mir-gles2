@@ -2,6 +2,9 @@
 // tangential space bump mapping, fragment shader
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+///essl #version 100
+///glsl #version 150
+
 #if GL_ES == 1
 #extension GL_OES_standard_derivatives : require
 
