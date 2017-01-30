@@ -2,7 +2,11 @@
 #define util_tex_H__
 
 #include <stdint.h>
-#include <GLES2/gl2.h>
+#if PLATFORM_GL
+	#include <GL/gl.h>
+#else
+	#include <GLES2/gl2.h>
+#endif
 
 namespace util {
 

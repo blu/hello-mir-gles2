@@ -1,7 +1,12 @@
 #ifndef rend_vert_attr_H__
 #define rend_vert_attr_H__
 
-#include <GLES2/gl2.h>
+#ifdef PLATFORM_GL
+	#include <GL/gl.h>
+#else
+	#include <GLES2/gl2.h>
+#endif
+
 #include <stdint.h>
 #include <cstddef>
 

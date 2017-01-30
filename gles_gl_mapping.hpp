@@ -61,6 +61,7 @@
 #define GL_DEBUG_SEVERITY_HIGH_KHR              GL_DEBUG_SEVERITY_HIGH_ARB
 #define GL_DEBUG_SEVERITY_MEDIUM_KHR            GL_DEBUG_SEVERITY_MEDIUM_ARB
 #define GL_DEBUG_SEVERITY_LOW_KHR               GL_DEBUG_SEVERITY_LOW_ARB
+#define GL_DEBUG_OUTPUT_KHR                     0x92E0
 
 #endif
 #endif // gles_gl_mapping_H__
